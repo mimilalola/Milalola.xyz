@@ -755,6 +755,7 @@
     <button class="view-btn active" data-view="input">INPUT</button>
     <button class="view-btn" data-view="matrix">MATRIX</button>
     <button id="new-day-btn">＋ NEW DAY</button>
+    <span id="saved-indicator" style="font-size:10px;letter-spacing:1px;color:#2E7D52;font-weight:600;opacity:0;transition:opacity 0.4s;white-space:nowrap;">✓ SAVED</span>
   </div>
 </div>
 
@@ -867,6 +868,48 @@ function assignedTasks()  { return tasks.filter(t => t.quadrant && t.title.trim(
 function completedTasks() { return assignedTasks().filter(t => t.done); }
 function incompleteTasks(){ return assignedTasks().filter(t => !t.done); }
 function quadrantTasks(qid) { return tasks.filter(t => t.quadrant === qid && t.title.trim()); }
+
+// ── Persistence ────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'elr_priority_matrix_v1';
+
+function saveState() {
+  try {
+    const payload = {
+      tasks,
+      date: document.getElementById('date-input').value,
+      view: currentView,
+      savedAt: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    showSavedIndicator();
+  } catch(e) { /* storage full or blocked — fail silently */ }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const payload = JSON.parse(raw);
+    if (!payload.tasks || !Array.isArray(payload.tasks)) return false;
+    // Merge saved tasks over empty shells to ensure all fields exist
+    tasks = Array.from({ length: 10 }, (_, i) => {
+      const saved = payload.tasks[i];
+      return saved ? { ...emptyTask(i + 1), ...saved, id: i + 1 } : emptyTask(i + 1);
+    });
+    if (payload.date) document.getElementById('date-input').value = payload.date;
+    if (payload.view) currentView = payload.view;
+    return true;
+  } catch(e) { return false; }
+}
+
+let _saveIndicatorTimer = null;
+function showSavedIndicator() {
+  let el = document.getElementById('saved-indicator');
+  if (!el) return;
+  el.style.opacity = '1';
+  clearTimeout(_saveIndicatorTimer);
+  _saveIndicatorTimer = setTimeout(() => { el.style.opacity = '0'; }, 1800);
+}
 
 // ── Render: Budget Bar ─────────────────────────────────────────────────────
 function renderBudget() {
@@ -1024,6 +1067,7 @@ function attachTaskRowEvents() {
       tasks.find(t => t.id === id).title = el.value;
       renderBudget();
       rerenderRowSummary(id);
+      saveState();
     });
     el.addEventListener('click', e => e.stopPropagation());
   });
@@ -1034,6 +1078,7 @@ function attachTaskRowEvents() {
       const id = parseInt(el.dataset.typeSelect);
       tasks.find(t => t.id === id).type = el.value;
       rerenderRowSummary(id);
+      saveState();
     });
     el.addEventListener('click', e => e.stopPropagation());
   });
@@ -1043,6 +1088,7 @@ function attachTaskRowEvents() {
     el.addEventListener('input', () => {
       const id = parseInt(el.dataset.notesInput);
       tasks.find(t => t.id === id).notes = el.value;
+      saveState();
     });
     el.addEventListener('click', e => e.stopPropagation());
   });
@@ -1061,6 +1107,7 @@ function attachTaskRowEvents() {
       });
       renderBudget();
       rerenderRowSummary(id);
+      saveState();
     });
   });
 
@@ -1083,6 +1130,7 @@ function attachTaskRowEvents() {
       });
       renderBudget();
       rerenderRowSummary(id);
+      saveState();
     });
   });
 }
@@ -1247,11 +1295,12 @@ function renderMatrixView() {
 }
 
 // ── Render All ─────────────────────────────────────────────────────────────
-function renderAll() {
+function renderAll(persist = true) {
   renderBudget();
   renderFooterDate();
   if (currentView === 'input') renderInputView();
   else renderMatrixView();
+  if (persist) saveState();
 }
 
 // ── View Switching ─────────────────────────────────────────────────────────
@@ -1273,16 +1322,17 @@ document.querySelectorAll('.view-btn').forEach(btn => {
 function doReset() {
   tasks = Array.from({ length: 10 }, (_, i) => emptyTask(i + 1));
   activeTaskId = null;
+  localStorage.removeItem(STORAGE_KEY);
   setView('input');
-  renderAll();
+  renderAll(false);
 }
 document.getElementById('reset-btn').addEventListener('click', doReset);
 
 // ── Date Input ─────────────────────────────────────────────────────────────
-document.getElementById('date-input').value = getTodayISO();
 document.getElementById('date-input').addEventListener('change', () => {
   renderFooterDate();
   if (currentView === 'matrix') renderMatrixView();
+  saveState();
 });
 
 // ── New Day Modal ──────────────────────────────────────────────────────────
@@ -1404,7 +1454,15 @@ function updateModalConfirmBtn(incomplete) {
 }
 
 // ── Boot ───────────────────────────────────────────────────────────────────
-renderAll();
+const restored = loadState();
+if (!restored) {
+  document.getElementById('date-input').value = getTodayISO();
+}
+// Sync view buttons to restored currentView
+document.querySelectorAll('.view-btn').forEach(b => {
+  b.classList.toggle('active', b.dataset.view === currentView);
+});
+renderAll(false);
 </script>
 </body>
 </html>
