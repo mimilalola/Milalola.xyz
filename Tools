@@ -1,452 +1,1411 @@
 Tools/TaskMatrix/index.html
-import { useState, useCallback } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Execution Matrix</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    body {
+      font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+      background: #FAFAFA;
+      min-height: 100vh;
+      color: #1C2B3A;
+    }
+
+    /* ── Header ── */
+    #header {
+      background: #1C2B3A;
+      color: #F0F4F7;
+      padding: 20px 32px 16px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    #header-eyebrow {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #7A8C96;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    #header-title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    #day-complete-badge {
+      display: none;
+      font-size: 13px;
+      background: #2E7D52;
+      color: #fff;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    #header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    #date-input {
+      background: transparent;
+      border: 1px solid #3D5A73;
+      color: #F0F4F7;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .view-btn {
+      padding: 6px 16px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      background: transparent;
+      color: #7A8C96;
+      transition: all 0.15s;
+    }
+    .view-btn.active {
+      background: #F0F4F7;
+      color: #1C2B3A;
+    }
+    #new-day-btn {
+      padding: 6px 16px;
+      border-radius: 4px;
+      border: 1px solid #2E7D52;
+      background: transparent;
+      color: #2E7D52;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    #new-day-btn:hover { background: #2E7D5215; }
+
+    /* ── Time Budget Bar ── */
+    #budget-bar {
+      background: #111D27;
+      padding: 12px 32px 10px;
+    }
+    #budget-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    #budget-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #7A8C96;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    #bar-track {
+      flex: 1;
+      height: 8px;
+      background: #2A3A4A;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    #bar-total {
+      position: absolute;
+      height: 100%;
+      width: 0%;
+      background: #3D5A7355;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+    #bar-done {
+      position: absolute;
+      height: 100%;
+      width: 0%;
+      background: #2E7D52;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+    #budget-numbers {
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    #budget-count {
+      font-size: 11px;
+      color: #7A8C96;
+      white-space: nowrap;
+    }
+    #reset-btn {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: #7A8C96;
+      background: transparent;
+      border: 1px solid #2A3A4A;
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    #budget-stats {
+      display: flex;
+      gap: 16px;
+    }
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-label {
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: #3D5A73;
+      font-weight: 600;
+    }
+    .stat-value {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* ── Main Content ── */
+    #main-content { padding: 24px 32px; }
+    #footer-date {
+      padding: 0 32px 24px;
+      font-size: 11px;
+      color: #B0BAC0;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── View Headers ── */
+    .view-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .section-eyebrow {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #7A8C96;
+      font-weight: 600;
+    }
+    #completion-pct {
+      font-size: 12px;
+      color: #2E7D52;
+      font-weight: 700;
+    }
+
+    /* ── Input View ── */
+    #task-list { display: grid; gap: 8px; }
+
+    .task-row {
+      background: #fff;
+      border: 1px solid #E4E8EB;
+      border-radius: 6px;
+      overflow: hidden;
+      transition: border-color 0.15s, opacity 0.2s;
+    }
+    .task-row.done-row {
+      background: #F6FAF7;
+      border-color: #A8D5B5;
+      opacity: 0.85;
+    }
+    .task-row.active-row { border-color: #1C2B3A; }
+
+    .task-row-summary {
+      display: grid;
+      grid-template-columns: 32px 22px 1fr auto auto auto;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .task-id {
+      font-family: monospace;
+      font-size: 11px;
+      color: #B0BAC0;
+      font-weight: 700;
+    }
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid #B0BAC0;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 12px;
+      font-weight: 700;
+      color: transparent;
+    }
+    .task-checkbox.checked {
+      border-color: #2E7D52;
+      background: #2E7D52;
+      color: #fff;
+    }
+    .task-checkbox.disabled {
+      border-color: #E4E8EB;
+      cursor: default;
+    }
+    .task-title-cell {
+      font-size: 14px;
+      color: #1C2B3A;
+      font-weight: 500;
+    }
+    .task-title-cell.empty { color: #B0BAC0; font-weight: 400; }
+    .task-title-cell.done-title { color: #7A8C96; text-decoration: line-through; }
+    .completed-at {
+      font-size: 10px;
+      margin-left: 8px;
+      color: #2E7D52;
+      font-weight: 600;
+      text-decoration: none !important;
+    }
+    .task-type-badge {
+      font-size: 10px;
+      background: #F0F4F7;
+      color: #3D5A73;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .task-hours-cell {
+      font-size: 12px;
+      color: #7A8C96;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .task-quadrant-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    .task-quadrant-unset {
+      font-size: 10px;
+      color: #D0D5D9;
+      border: 1px dashed #D0D5D9;
+      padding: 2px 8px;
+      border-radius: 3px;
+      letter-spacing: 1px;
+    }
+
+    .task-expand {
+      padding: 0 16px 16px;
+      border-top: 1px solid #F0F4F7;
+      display: none;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .task-expand.open { display: grid; }
+
+    .expand-row-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .field-label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: #7A8C96;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .field-input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #E4E8EB;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #1C2B3A;
+      background: #FAFAFA;
+      outline: none;
+      font-family: inherit;
+    }
+    .field-input:focus { border-color: #3D5A73; }
+
+    .hour-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .hour-btn {
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid #E4E8EB;
+      background: #fff;
+      color: #7A8C96;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 400;
+      transition: all 0.1s;
+    }
+    .hour-btn.selected {
+      border-color: #1C2B3A;
+      background: #1C2B3A;
+      color: #fff;
+      font-weight: 600;
+    }
+    .quadrant-btns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .quadrant-btn {
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #E4E8EB;
+      background: #fff;
+      color: #7A8C96;
+      font-size: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-align: center;
+      transition: all 0.1s;
+    }
+
+    /* ── Matrix View ── */
+    #matrix-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .quadrant-card {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .quadrant-header {
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .quadrant-header-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    .quadrant-header-sub {
+      font-size: 10px;
+      color: #7A8C96;
+      margin-top: 2px;
+    }
+    .quadrant-header-right { text-align: right; }
+    .quadrant-hours {
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .quadrant-done-hours {
+      font-size: 10px;
+      color: #2E7D52;
+      font-weight: 600;
+    }
+    .quadrant-body { padding: 4px 0; min-height: 80px; }
+    .quadrant-empty {
+      padding: 16px;
+      font-size: 12px;
+      color: #D0D5D9;
+      font-style: italic;
+    }
+
+    .matrix-task {
+      padding: 10px 16px;
+      border-bottom: 1px solid #F5F6F7;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      background: #fff;
+      transition: background 0.15s;
+    }
+    .matrix-task.done-task { background: #F6FAF7; }
+    .matrix-task:hover { background: #F8FAFB; }
+    .matrix-task.done-task:hover { background: #F0F9F4; }
+
+    .matrix-cb {
+      width: 18px;
+      height: 18px;
+      border-radius: 3px;
+      border: 2px solid #ccc;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: all 0.15s;
+      font-size: 11px;
+      font-weight: 700;
+      color: transparent;
+    }
+    .matrix-cb.checked {
+      background: #2E7D52;
+      border-color: #2E7D52;
+      color: #fff;
+    }
+    .matrix-task-body { flex: 1; }
+    .matrix-task-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .matrix-task-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1C2B3A;
+    }
+    .matrix-task-title.done-title {
+      color: #7A8C96;
+      text-decoration: line-through;
+    }
+    .matrix-task-hrs {
+      font-size: 11px;
+      color: #7A8C96;
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+      font-weight: 400;
+    }
+    .matrix-task-hrs.done-hrs {
+      color: #2E7D52;
+      font-weight: 700;
+    }
+    .matrix-task-meta {
+      display: flex;
+      gap: 6px;
+      margin-top: 3px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .meta-type {
+      font-size: 10px;
+      color: #7A8C96;
+      background: #F5F6F7;
+      padding: 1px 6px;
+      border-radius: 8px;
+    }
+    .meta-notes { font-size: 10px; color: #B0BAC0; font-style: italic; }
+    .meta-time { font-size: 10px; color: #2E7D52; font-weight: 600; }
+
+    /* Unassigned */
+    #unassigned-section {
+      margin-top: 16px;
+      background: #FFF8F0;
+      border: 1px solid #F0D9C0;
+      border-radius: 6px;
+      padding: 12px 16px;
+      display: none;
+    }
+    .unassigned-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #C08050;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .unassigned-item {
+      font-size: 13px;
+      color: #7A5A40;
+      padding: 4px 0;
+      border-bottom: 1px solid #F0E0D0;
+    }
+
+    /* Summary Footer */
+    #summary-footer {
+      margin-top: 16px;
+      background: #1C2B3A;
+      border-radius: 6px;
+      padding: 14px 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr) 1px 1fr 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+    .footer-col { text-align: center; }
+    .footer-col-label {
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: #7A8C96;
+      font-weight: 600;
+    }
+    .footer-col-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #F0F4F7;
+      margin-top: 2px;
+    }
+    .footer-col-sub {
+      font-size: 10px;
+      color: #3D5A73;
+    }
+    .footer-divider {
+      background: #2A3A4A;
+      width: 1px;
+      height: 40px;
+      margin: 0 auto;
+    }
+
+    /* ── Modal ── */
+    #modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,18,26,0.75);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #modal-overlay.open { display: flex; }
+    #modal-box {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+    }
+    #modal-header {
+      background: #1C2B3A;
+      padding: 20px 24px;
+    }
+    #modal-eyebrow {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: #7A8C96;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    #modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #F0F4F7;
+    }
+    #modal-body { padding: 20px 24px; }
+    #modal-desc {
+      font-size: 13px;
+      color: #3D5A73;
+      margin: 0 0 16px;
+      line-height: 1.6;
+    }
+    #modal-carry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    #modal-carry-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: #7A8C96;
+      font-weight: 600;
+    }
+    #modal-toggle-all {
+      font-size: 11px;
+      color: #3D5A73;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    #modal-task-list {
+      display: grid;
+      gap: 6px;
+      max-height: 260px;
+      overflow-y: auto;
+      margin-bottom: 16px;
+    }
+    .modal-task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #E4E8EB;
+      background: #FAFAFA;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .modal-task-item.selected {
+      border-color: #1C2B3A;
+      background: #EEF2F6;
+    }
+    .modal-cb {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      border: 2px solid #B0BAC0;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 700;
+      color: transparent;
+      transition: all 0.15s;
+    }
+    .modal-cb.checked {
+      border-color: #1C2B3A;
+      background: #1C2B3A;
+      color: #fff;
+    }
+    .modal-task-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1C2B3A;
+    }
+    .modal-task-meta {
+      display: flex;
+      gap: 8px;
+      margin-top: 3px;
+    }
+    #modal-summary {
+      background: #F0F4F7;
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: #3D5A73;
+      display: none;
+    }
+    #modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    #modal-cancel {
+      padding: 9px 20px;
+      border-radius: 6px;
+      border: 1px solid #E4E8EB;
+      background: #fff;
+      color: #7A8C96;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: inherit;
+    }
+    #modal-confirm {
+      padding: 9px 20px;
+      border-radius: 6px;
+      border: none;
+      background: #1C2B3A;
+      color: #F0F4F7;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      font-family: inherit;
+    }
+
+    /* ── Utilities ── */
+    .hidden { display: none !important; }
+
+    @media (max-width: 640px) {
+      #header { padding: 16px; }
+      #main-content { padding: 16px; }
+      #budget-bar { padding: 10px 16px 8px; }
+      #footer-date { padding: 0 16px 16px; }
+      #matrix-grid { grid-template-columns: 1fr; }
+      #summary-footer { grid-template-columns: repeat(2, 1fr); }
+      .footer-divider { display: none; }
+      .expand-row-2col { grid-template-columns: 1fr; }
+      #header-controls { gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<div id="header">
+  <div>
+    <div id="header-eyebrow">DAILY EXECUTION MATRIX</div>
+    <div id="header-title">
+      Priority &amp; Efficiency Planner
+      <span id="day-complete-badge">DAY COMPLETE</span>
+    </div>
+  </div>
+  <div id="header-controls">
+    <input type="date" id="date-input" />
+    <button class="view-btn active" data-view="input">INPUT</button>
+    <button class="view-btn" data-view="matrix">MATRIX</button>
+    <button id="new-day-btn">＋ NEW DAY</button>
+  </div>
+</div>
+
+<!-- ── Time Budget Bar ── -->
+<div id="budget-bar">
+  <div id="budget-top">
+    <div id="budget-label">TIME BUDGET</div>
+    <div id="bar-track">
+      <div id="bar-total"></div>
+      <div id="bar-done"></div>
+    </div>
+    <div id="budget-numbers"></div>
+    <div id="budget-count"></div>
+    <button id="reset-btn">RESET</button>
+  </div>
+  <div id="budget-stats">
+    <div class="stat-pill"><span class="stat-label">REMAINING</span><span class="stat-value" id="stat-remaining"></span></div>
+    <div class="stat-pill"><span class="stat-label">COMPLETED</span><span class="stat-value" id="stat-completed" style="color:#2E7D52"></span></div>
+    <div class="stat-pill"><span class="stat-label">TASKS LEFT</span><span class="stat-value" id="stat-tasks-left" style="color:#7A8C96"></span></div>
+  </div>
+</div>
+
+<!-- ── Main Content ── -->
+<div id="main-content">
+
+  <!-- Input View -->
+  <div id="view-input">
+    <div class="section-eyebrow" style="margin-bottom:16px">DEFINE YOUR 10 TASKS</div>
+    <div id="task-list"></div>
+  </div>
+
+  <!-- Matrix View -->
+  <div id="view-matrix" class="hidden">
+    <div class="view-header">
+      <div class="section-eyebrow" id="matrix-date-label"></div>
+      <div id="completion-pct">0% complete</div>
+    </div>
+    <div id="matrix-grid"></div>
+    <div id="unassigned-section">
+      <div class="unassigned-label">UNASSIGNED</div>
+      <div id="unassigned-list"></div>
+    </div>
+    <div id="summary-footer"></div>
+  </div>
+
+</div>
+
+<div id="footer-date"></div>
+
+<!-- ── New Day Modal ── -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div id="modal-header">
+      <div id="modal-eyebrow">NEW DAY</div>
+      <div id="modal-title">Start fresh tomorrow</div>
+    </div>
+    <div id="modal-body">
+      <p id="modal-desc"></p>
+      <div id="modal-incomplete-section">
+        <div id="modal-carry-header">
+          <span id="modal-carry-label">CARRY FORWARD</span>
+          <button id="modal-toggle-all">DESELECT ALL</button>
+        </div>
+        <div id="modal-task-list"></div>
+        <div id="modal-summary"></div>
+      </div>
+      <div id="modal-actions">
+        <button id="modal-cancel">Cancel</button>
+        <button id="modal-confirm">Start New Day →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
 const QUADRANTS = [
-  { id: "do-first", label: "DO FIRST", sub: "Urgent + High Impact", accent: "#1C2B3A", light: "#EEF2F6", border: "#1C2B3A", dot: "#1C2B3A" },
-  { id: "schedule", label: "SCHEDULE", sub: "Not Urgent + High Impact", accent: "#3D5A73", light: "#F0F4F7", border: "#3D5A73", dot: "#3D5A73" },
-  { id: "delegate", label: "DELEGATE", sub: "Urgent + Lower Impact", accent: "#7A8C96", light: "#F5F6F7", border: "#7A8C96", dot: "#7A8C96" },
-  { id: "defer", label: "DEFER", sub: "Not Urgent + Lower Impact", accent: "#B0BAC0", light: "#F8F9FA", border: "#B0BAC0", dot: "#B0BAC0" },
+  { id: 'do-first',  label: 'DO FIRST',  sub: 'Urgent + High Impact',        accent: '#1C2B3A', light: '#EEF2F6', border: '#1C2B3A', dot: '#1C2B3A' },
+  { id: 'schedule',  label: 'SCHEDULE',  sub: 'Not Urgent + High Impact',    accent: '#3D5A73', light: '#F0F4F7', border: '#3D5A73', dot: '#3D5A73' },
+  { id: 'delegate',  label: 'DELEGATE',  sub: 'Urgent + Lower Impact',       accent: '#7A8C96', light: '#F5F6F7', border: '#7A8C96', dot: '#7A8C96' },
+  { id: 'defer',     label: 'DEFER',     sub: 'Not Urgent + Lower Impact',   accent: '#B0BAC0', light: '#F8F9FA', border: '#B0BAC0', dot: '#B0BAC0' },
 ];
-
 const HOUR_OPTIONS = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4];
 const MAX_HOURS = 9;
-const TASK_TYPES = ["Drafting", "Research", "Decision", "Follow-up", "Meeting", "Review", "Admin"];
+const TASK_TYPES = ['Drafting', 'Research', 'Decision', 'Follow-up', 'Meeting', 'Review', 'Admin'];
 
-const emptyTask = (id) => ({ id, title: "", hours: 1, type: "", quadrant: "", notes: "", done: false, completedAt: null });
-const initialTasks = Array.from({ length: 10 }, (_, i) => emptyTask(i + 1));
+// ── State ──────────────────────────────────────────────────────────────────
+function emptyTask(id) {
+  return { id, title: '', hours: 1, type: '', quadrant: '', notes: '', done: false, completedAt: null };
+}
+let tasks = Array.from({ length: 10 }, (_, i) => emptyTask(i + 1));
+let activeTaskId = null;
+let currentView = 'input';
+let modalSelectedIds = new Set();
 
-const getTomorrowDate = () => {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  return d.toISOString().split("T")[0];
-};
+// ── Helpers ────────────────────────────────────────────────────────────────
+function getTodayISO() { return new Date().toISOString().split('T')[0]; }
+function getTomorrowISO() {
+  const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().split('T')[0];
+}
+function formatDate(iso) {
+  const d = new Date(iso + 'T12:00:00');
+  return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function assignedTasks()  { return tasks.filter(t => t.quadrant && t.title.trim()); }
+function completedTasks() { return assignedTasks().filter(t => t.done); }
+function incompleteTasks(){ return assignedTasks().filter(t => !t.done); }
+function quadrantTasks(qid) { return tasks.filter(t => t.quadrant === qid && t.title.trim()); }
 
-// ── New Day Modal ────────────────────────────────────────────────────────────
-function NewDayModal({ incompleteTasks, onConfirm, onClose }) {
-  const [selected, setSelected] = useState(() => new Set(incompleteTasks.map((t) => t.id)));
+// ── Render: Budget Bar ─────────────────────────────────────────────────────
+function renderBudget() {
+  const at = assignedTasks(), ct = completedTasks();
+  const totalH   = at.reduce((s,t) => s + t.hours, 0);
+  const doneH    = ct.reduce((s,t) => s + t.hours, 0);
+  const remH     = totalH - doneH;
+  const overBudget = totalH > MAX_HOURS;
 
-  const toggleSelect = (id) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
+  const totalPct = Math.min(totalH / MAX_HOURS * 100, 100);
+  const donePct  = Math.min(doneH  / MAX_HOURS * 100, 100);
 
-  const toggleAll = () => {
-    if (selected.size === incompleteTasks.length) setSelected(new Set());
-    else setSelected(new Set(incompleteTasks.map((t) => t.id)));
-  };
+  document.getElementById('bar-total').style.width = totalPct + '%';
+  document.getElementById('bar-total').style.background = overBudget ? '#C0392B33' : '#3D5A7355';
+  document.getElementById('bar-done').style.width  = donePct + '%';
+  document.getElementById('bar-done').style.background = overBudget ? '#C0392B' : '#2E7D52';
 
-  const hasIncomplete = incompleteTasks.length > 0;
+  document.getElementById('budget-numbers').innerHTML =
+    `<span style="color:#2E7D52;font-weight:700">${doneH.toFixed(1)}h</span>` +
+    `<span style="color:#7A8C96;font-weight:400"> done · </span>` +
+    `<span style="color:${overBudget?'#E74C3C':'#F0F4F7'};font-weight:700">${totalH.toFixed(1)}h</span>` +
+    `<span style="color:#7A8C96;font-weight:400"> / ${MAX_HOURS}h</span>`;
 
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(10,18,26,0.75)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
-      <div style={{ background: "#fff", borderRadius: "12px", width: "100%", maxWidth: "480px", overflow: "hidden", boxShadow: "0 24px 60px rgba(0,0,0,0.3)" }}>
-        {/* Modal header */}
-        <div style={{ background: "#1C2B3A", padding: "20px 24px" }}>
-          <div style={{ fontSize: "10px", letterSpacing: "3px", color: "#7A8C96", marginBottom: "4px", fontWeight: 600 }}>NEW DAY</div>
-          <div style={{ fontSize: "18px", fontWeight: 700, color: "#F0F4F7" }}>Start fresh tomorrow</div>
-        </div>
+  document.getElementById('budget-count').textContent = `${ct.length}/${at.length} done`;
+  document.getElementById('stat-remaining').textContent = remH.toFixed(1) + 'h';
+  document.getElementById('stat-remaining').style.color = remH > 0 ? '#7A8C96' : '#2E7D52';
+  document.getElementById('stat-completed').textContent = doneH.toFixed(1) + 'h';
+  document.getElementById('stat-tasks-left').textContent = at.length - ct.length;
 
-        <div style={{ padding: "20px 24px" }}>
-          {hasIncomplete ? (
-            <>
-              <p style={{ fontSize: "13px", color: "#3D5A73", margin: "0 0 16px", lineHeight: 1.6 }}>
-                You have <strong>{incompleteTasks.length} incomplete {incompleteTasks.length === 1 ? "task" : "tasks"}</strong>. Select which ones to carry forward into tomorrow — they will be transferred with their details intact, but completion status and timestamps will reset.
-              </p>
-
-              {/* Select all toggle */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                <div style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#7A8C96", fontWeight: 600 }}>CARRY FORWARD</div>
-                <button onClick={toggleAll} style={{ fontSize: "11px", color: "#3D5A73", background: "transparent", border: "none", cursor: "pointer", fontWeight: 600, letterSpacing: "0.5px" }}>
-                  {selected.size === incompleteTasks.length ? "DESELECT ALL" : "SELECT ALL"}
-                </button>
-              </div>
-
-              {/* Task list */}
-              <div style={{ display: "grid", gap: "6px", maxHeight: "260px", overflowY: "auto", marginBottom: "20px" }}>
-                {incompleteTasks.map((t) => {
-                  const q = QUADRANTS.find((q) => q.id === t.quadrant);
-                  const isSelected = selected.has(t.id);
-                  return (
-                    <div key={t.id} onClick={() => toggleSelect(t.id)}
-                      style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 12px", borderRadius: "6px", border: `1px solid ${isSelected ? "#1C2B3A" : "#E4E8EB"}`, background: isSelected ? "#EEF2F6" : "#FAFAFA", cursor: "pointer", transition: "all 0.15s" }}>
-                      <div style={{ width: "18px", height: "18px", borderRadius: "4px", border: `2px solid ${isSelected ? "#1C2B3A" : "#B0BAC0"}`, background: isSelected ? "#1C2B3A" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
-                        {isSelected && <span style={{ color: "#fff", fontSize: "11px", fontWeight: 700 }}>✓</span>}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: "13px", fontWeight: 500, color: "#1C2B3A" }}>{t.title}</div>
-                        <div style={{ display: "flex", gap: "8px", marginTop: "3px" }}>
-                          {q && <span style={{ fontSize: "10px", color: q.accent, fontWeight: 700, letterSpacing: "0.5px" }}>{q.label}</span>}
-                          {t.type && <span style={{ fontSize: "10px", color: "#7A8C96" }}>{t.type}</span>}
-                          <span style={{ fontSize: "10px", color: "#B0BAC0" }}>{t.hours}h</span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {selected.size > 0 && (
-                <div style={{ background: "#F0F4F7", borderRadius: "6px", padding: "10px 14px", marginBottom: "16px", fontSize: "12px", color: "#3D5A73" }}>
-                  <strong>{selected.size}</strong> task{selected.size !== 1 ? "s" : ""} will carry forward · remaining {10 - selected.size} slot{10 - selected.size !== 1 ? "s" : ""} will be blank
-                </div>
-              )}
-            </>
-          ) : (
-            <p style={{ fontSize: "13px", color: "#3D5A73", margin: "0 0 20px", lineHeight: 1.6 }}>
-              All tasks are complete. Starting a fresh new day will clear everything. Ready to go?
-            </p>
-          )}
-
-          {/* Actions */}
-          <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-            <button onClick={onClose}
-              style={{ padding: "9px 20px", borderRadius: "6px", border: "1px solid #E4E8EB", background: "#fff", color: "#7A8C96", fontSize: "13px", cursor: "pointer", fontWeight: 600 }}>
-              Cancel
-            </button>
-            <button onClick={() => onConfirm(selected)}
-              style={{ padding: "9px 20px", borderRadius: "6px", border: "none", background: "#1C2B3A", color: "#F0F4F7", fontSize: "13px", cursor: "pointer", fontWeight: 600, letterSpacing: "0.5px" }}>
-              {hasIncomplete && selected.size > 0 ? `Start New Day →` : "Start Fresh →"}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  const allDone = at.length > 0 && ct.length === at.length;
+  document.getElementById('day-complete-badge').style.display = allDone ? 'inline-block' : 'none';
 }
 
-// ── Main App ─────────────────────────────────────────────────────────────────
-export default function PriorityMatrix() {
-  const [tasks, setTasks] = useState(initialTasks);
-  const [activeTask, setActiveTask] = useState(null);
-  const [view, setView] = useState("input");
-  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
-  const [showNewDayModal, setShowNewDayModal] = useState(false);
+// ── Render: Footer Date ────────────────────────────────────────────────────
+function renderFooterDate() {
+  document.getElementById('footer-date').textContent = formatDate(document.getElementById('date-input').value);
+}
 
-  const assignedTasks = tasks.filter((t) => t.quadrant && t.title.trim());
-  const completedTasks = assignedTasks.filter((t) => t.done);
-  const incompleteTasks = assignedTasks.filter((t) => !t.done);
-  const totalHours = assignedTasks.reduce((s, t) => s + t.hours, 0);
-  const hoursCompleted = completedTasks.reduce((s, t) => s + t.hours, 0);
-  const hoursRemaining = totalHours - hoursCompleted;
+// ── Render: Input View ─────────────────────────────────────────────────────
+function renderInputView() {
+  const list = document.getElementById('task-list');
+  list.innerHTML = tasks.map(t => renderTaskRow(t)).join('');
+  attachTaskRowEvents();
+}
 
-  const updateTask = useCallback((id, field, value) => {
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, [field]: value } : t)));
-  }, []);
+function renderTaskRow(t) {
+  const q = QUADRANTS.find(q => q.id === t.quadrant);
+  const canComplete = !!(t.quadrant && t.title.trim());
+  const isActive = activeTaskId === t.id;
 
-  const toggleDone = useCallback((id) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === id
-          ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : null }
-          : t
-      )
-    );
-  }, []);
+  const cbClass = t.done ? 'task-checkbox checked' : (canComplete ? 'task-checkbox' : 'task-checkbox disabled');
+  const titleClass = t.done ? 'task-title-cell done-title' : (t.title ? 'task-title-cell' : 'task-title-cell empty');
+  const rowClass = t.done ? 'task-row done-row' : (isActive ? 'task-row active-row' : 'task-row');
 
-  const handleNewDayClick = () => setShowNewDayModal(true);
+  const quadrantBadge = q
+    ? `<span class="task-quadrant-badge" style="background:${q.light};color:${q.accent};border:1px solid ${q.border}20">${q.label}</span>`
+    : `<span class="task-quadrant-unset">UNSET</span>`;
 
-  const handleNewDayConfirm = (selectedIds) => {
-    const carried = incompleteTasks.filter((t) => selectedIds.has(t.id));
-    // Build new tasks: carried tasks fill first slots, rest are blank
-    const newTasks = Array.from({ length: 10 }, (_, i) => {
-      if (i < carried.length) {
-        const src = carried[i];
-        return { ...emptyTask(i + 1), title: src.title, hours: src.hours, type: src.type, quadrant: src.quadrant, notes: src.notes };
-      }
-      return emptyTask(i + 1);
-    });
-    setTasks(newTasks);
-    setDate(getTomorrowDate());
-    setView("input");
-    setActiveTask(null);
-    setShowNewDayModal(false);
-  };
+  const typeBadge = t.type ? `<span class="task-type-badge">${esc(t.type)}</span>` : '';
+  const completedAt = (t.done && t.completedAt) ? `<span class="completed-at">✓ ${esc(t.completedAt)}</span>` : '';
 
-  const reset = () => { setTasks(initialTasks); setView("input"); setActiveTask(null); };
+  const expand = isActive ? renderTaskExpand(t) : '';
 
-  const formatDate = (iso) => {
-    const d = new Date(iso + "T12:00:00");
-    return d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  };
+  return `
+    <div class="${rowClass}" data-id="${t.id}">
+      <div class="task-row-summary" data-toggle="${t.id}">
+        <span class="task-id">T${String(t.id).padStart(2,'0')}</span>
+        <div class="${cbClass}" data-check="${t.id}" title="${canComplete?(t.done?'Mark incomplete':'Mark complete'):'Assign quadrant first'}">✓</div>
+        <div class="${titleClass}">${esc(t.title)||'Untitled task'}${completedAt}</div>
+        ${typeBadge}
+        <span class="task-hours-cell">${t.hours}h</span>
+        ${quadrantBadge}
+      </div>
+      ${expand}
+    </div>`;
+}
 
-  const totalBarPct = Math.min((totalHours / MAX_HOURS) * 100, 100);
-  const completedBarPct = Math.min((hoursCompleted / MAX_HOURS) * 100, 100);
-  const overBudget = totalHours > MAX_HOURS;
-  const allDone = assignedTasks.length > 0 && completedTasks.length === assignedTasks.length;
-  const quadrantTasks = (qid) => tasks.filter((t) => t.quadrant === qid && t.title.trim());
+function renderTaskExpand(t) {
+  const hourBtns = HOUR_OPTIONS.map(h =>
+    `<button class="hour-btn ${t.hours===h?'selected':''}" data-hour-btn="${t.id}" data-val="${h}">${h}h</button>`
+  ).join('');
 
-  return (
-    <div style={{ fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif", background: "#FAFAFA", minHeight: "100vh" }}>
-      {showNewDayModal && (
-        <NewDayModal
-          incompleteTasks={incompleteTasks}
-          onConfirm={handleNewDayConfirm}
-          onClose={() => setShowNewDayModal(false)}
-        />
-      )}
+  const quadBtns = QUADRANTS.map(q =>
+    `<button class="quadrant-btn" data-quad-btn="${t.id}" data-qid="${q.id}"
+      style="border-color:${t.quadrant===q.id?q.accent:'#E4E8EB'};background:${t.quadrant===q.id?q.light:'#fff'};color:${t.quadrant===q.id?q.accent:'#7A8C96'}"
+      >${q.label}</button>`
+  ).join('');
 
-      {/* Header */}
-      <div style={{ background: "#1C2B3A", color: "#F0F4F7", padding: "20px 32px 16px", display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+  const typeOptions = TASK_TYPES.map(tp =>
+    `<option value="${tp}" ${t.type===tp?'selected':''}>${tp}</option>`
+  ).join('');
+
+  return `
+    <div class="task-expand open">
+      <div class="expand-row-2col">
         <div>
-          <div style={{ fontSize: "10px", letterSpacing: "3px", color: "#7A8C96", marginBottom: "4px", fontWeight: 600 }}>DAILY EXECUTION MATRIX</div>
-          <div style={{ fontSize: "22px", fontWeight: 700, letterSpacing: "-0.5px" }}>
-            Priority & Efficiency Planner
-            {allDone && <span style={{ marginLeft: "12px", fontSize: "13px", background: "#2E7D52", color: "#fff", padding: "3px 10px", borderRadius: "10px", fontWeight: 600, letterSpacing: "1px" }}>DAY COMPLETE</span>}
-          </div>
+          <label class="field-label">Task title</label>
+          <input class="field-input" data-title-input="${t.id}" value="${esc(t.title)}" placeholder="Describe the task..." />
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-            style={{ background: "transparent", border: "1px solid #3D5A73", color: "#F0F4F7", padding: "6px 10px", borderRadius: "4px", fontSize: "13px", cursor: "pointer" }} />
-          <div style={{ display: "flex", gap: "8px" }}>
-            {["input", "matrix"].map((v) => (
-              <button key={v} onClick={() => setView(v)} style={{ padding: "6px 16px", borderRadius: "4px", border: "none", cursor: "pointer", fontSize: "12px", fontWeight: 600, letterSpacing: "1px", background: view === v ? "#F0F4F7" : "transparent", color: view === v ? "#1C2B3A" : "#7A8C96" }}>
-                {v.toUpperCase()}
-              </button>
-            ))}
-          </div>
-          {/* NEW DAY button */}
-          <button onClick={handleNewDayClick}
-            style={{ padding: "6px 16px", borderRadius: "4px", border: "1px solid #2E7D52", background: "transparent", color: "#2E7D52", fontSize: "12px", fontWeight: 700, letterSpacing: "1px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", transition: "all 0.15s", whiteSpace: "nowrap" }}>
-            ＋ NEW DAY
-          </button>
+        <div>
+          <label class="field-label">Task type</label>
+          <select class="field-input" data-type-select="${t.id}">
+            <option value="">Select type</option>
+            ${typeOptions}
+          </select>
         </div>
       </div>
-
-      {/* Time budget bar */}
-      <div style={{ background: "#111D27", padding: "12px 32px 10px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "8px" }}>
-          <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#7A8C96", fontWeight: 600, whiteSpace: "nowrap" }}>TIME BUDGET</div>
-          <div style={{ flex: 1, height: "8px", background: "#2A3A4A", borderRadius: "4px", overflow: "hidden", position: "relative" }}>
-            <div style={{ position: "absolute", height: "100%", width: `${totalBarPct}%`, background: overBudget ? "#C0392B33" : "#3D5A7355", borderRadius: "4px" }} />
-            <div style={{ position: "absolute", height: "100%", width: `${completedBarPct}%`, background: overBudget ? "#C0392B" : "#2E7D52", borderRadius: "4px", transition: "width 0.4s ease" }} />
-          </div>
-          <div style={{ fontSize: "13px", fontWeight: 700, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
-            <span style={{ color: "#2E7D52" }}>{hoursCompleted.toFixed(1)}h</span>
-            <span style={{ color: "#7A8C96", fontWeight: 400 }}> done · </span>
-            <span style={{ color: overBudget ? "#E74C3C" : "#F0F4F7" }}>{totalHours.toFixed(1)}h</span>
-            <span style={{ color: "#7A8C96", fontWeight: 400 }}> / {MAX_HOURS}h</span>
-          </div>
-          <div style={{ fontSize: "11px", color: "#7A8C96", whiteSpace: "nowrap" }}>{completedTasks.length}/{assignedTasks.length} done</div>
-          <button onClick={reset} style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#7A8C96", background: "transparent", border: "1px solid #2A3A4A", padding: "4px 10px", borderRadius: "3px", cursor: "pointer", fontWeight: 600 }}>RESET</button>
+      <div>
+        <label class="field-label">Notes (optional)</label>
+        <input class="field-input" data-notes-input="${t.id}" value="${esc(t.notes)}" placeholder="Context, dependencies, next move..." />
+      </div>
+      <div class="expand-row-2col">
+        <div>
+          <label class="field-label">Time estimate</label>
+          <div class="hour-btns">${hourBtns}</div>
         </div>
-        <div style={{ display: "flex", gap: "16px" }}>
-          {[
-            { label: "REMAINING", value: `${hoursRemaining.toFixed(1)}h`, color: hoursRemaining > 0 ? "#7A8C96" : "#2E7D52" },
-            { label: "COMPLETED", value: `${hoursCompleted.toFixed(1)}h`, color: "#2E7D52" },
-            { label: "TASKS LEFT", value: `${assignedTasks.length - completedTasks.length}`, color: "#7A8C96" },
-          ].map((s) => (
-            <div key={s.label} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ fontSize: "9px", letterSpacing: "1.5px", color: "#3D5A73", fontWeight: 600 }}>{s.label}</span>
-              <span style={{ fontSize: "12px", fontWeight: 700, color: s.color }}>{s.value}</span>
-            </div>
-          ))}
+        <div>
+          <label class="field-label">Assign to quadrant</label>
+          <div class="quadrant-btns">${quadBtns}</div>
         </div>
       </div>
-
-      <div style={{ padding: "24px 32px" }}>
-        {view === "input" ? (
-          <InputView tasks={tasks} updateTask={updateTask} toggleDone={toggleDone} activeTask={activeTask} setActiveTask={setActiveTask} />
-        ) : (
-          <MatrixView tasks={tasks} quadrantTasks={quadrantTasks} toggleDone={toggleDone} date={date} formatDate={formatDate} hoursCompleted={hoursCompleted} totalHours={totalHours} completedTasks={completedTasks} assignedTasks={assignedTasks} />
-        )}
-      </div>
-
-      <div style={{ padding: "0 32px 24px", fontSize: "11px", color: "#B0BAC0", letterSpacing: "0.5px" }}>
-        {formatDate(date)}
-      </div>
-    </div>
-  );
+    </div>`;
 }
 
-// ── Input View ────────────────────────────────────────────────────────────────
-function InputView({ tasks, updateTask, toggleDone, activeTask, setActiveTask }) {
-  return (
-    <div>
-      <div style={{ fontSize: "11px", letterSpacing: "2px", color: "#7A8C96", fontWeight: 600, marginBottom: "16px" }}>DEFINE YOUR 10 TASKS</div>
-      <div style={{ display: "grid", gap: "8px" }}>
-        {tasks.map((task) => (
-          <TaskRow key={task.id} task={task} updateTask={updateTask} toggleDone={toggleDone}
-            isActive={activeTask === task.id} onToggle={() => setActiveTask(activeTask === task.id ? null : task.id)} />
-        ))}
-      </div>
-    </div>
-  );
+function attachTaskRowEvents() {
+  // Toggle expand
+  document.querySelectorAll('[data-toggle]').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target.closest('[data-check]')) return;
+      const id = parseInt(el.dataset.toggle);
+      activeTaskId = activeTaskId === id ? null : id;
+      renderInputView();
+    });
+  });
+
+  // Checkbox
+  document.querySelectorAll('[data-check]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = parseInt(el.dataset.check);
+      const t = tasks.find(t => t.id === id);
+      if (!t || !(t.quadrant && t.title.trim())) return;
+      t.done = !t.done;
+      t.completedAt = t.done
+        ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+        : null;
+      renderAll();
+    });
+  });
+
+  // Title input
+  document.querySelectorAll('[data-title-input]').forEach(el => {
+    el.addEventListener('input', () => {
+      const id = parseInt(el.dataset.titleInput);
+      tasks.find(t => t.id === id).title = el.value;
+      renderBudget();
+      rerenderRowSummary(id);
+    });
+    el.addEventListener('click', e => e.stopPropagation());
+  });
+
+  // Type select
+  document.querySelectorAll('[data-type-select]').forEach(el => {
+    el.addEventListener('change', () => {
+      const id = parseInt(el.dataset.typeSelect);
+      tasks.find(t => t.id === id).type = el.value;
+      rerenderRowSummary(id);
+    });
+    el.addEventListener('click', e => e.stopPropagation());
+  });
+
+  // Notes input
+  document.querySelectorAll('[data-notes-input]').forEach(el => {
+    el.addEventListener('input', () => {
+      const id = parseInt(el.dataset.notesInput);
+      tasks.find(t => t.id === id).notes = el.value;
+    });
+    el.addEventListener('click', e => e.stopPropagation());
+  });
+
+  // Hour buttons
+  document.querySelectorAll('[data-hour-btn]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = parseInt(el.dataset.hourBtn);
+      const val = parseFloat(el.dataset.val);
+      tasks.find(t => t.id === id).hours = val;
+      // re-render hour buttons only
+      const parent = el.closest('.hour-btns');
+      parent.querySelectorAll('[data-hour-btn]').forEach(b => {
+        b.classList.toggle('selected', parseFloat(b.dataset.val) === val);
+      });
+      renderBudget();
+      rerenderRowSummary(id);
+    });
+  });
+
+  // Quadrant buttons
+  document.querySelectorAll('[data-quad-btn]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = parseInt(el.dataset.quadBtn);
+      const qid = el.dataset.qid;
+      const t = tasks.find(t => t.id === id);
+      t.quadrant = t.quadrant === qid ? '' : qid;
+      // re-style quad buttons
+      const parent = el.closest('.quadrant-btns');
+      parent.querySelectorAll('[data-quad-btn]').forEach(b => {
+        const q = QUADRANTS.find(q => q.id === b.dataset.qid);
+        const sel = b.dataset.qid === t.quadrant;
+        b.style.borderColor = sel ? q.accent : '#E4E8EB';
+        b.style.background  = sel ? q.light  : '#fff';
+        b.style.color       = sel ? q.accent : '#7A8C96';
+      });
+      renderBudget();
+      rerenderRowSummary(id);
+    });
+  });
 }
 
-// ── Task Row ──────────────────────────────────────────────────────────────────
-function TaskRow({ task, updateTask, toggleDone, isActive, onToggle }) {
-  const q = QUADRANTS.find((q) => q.id === task.quadrant);
-  const canComplete = !!task.quadrant && !!task.title.trim();
+// Re-render just the summary row of a task without collapsing the expand
+function rerenderRowSummary(id) {
+  const t = tasks.find(t => t.id === id);
+  const q = QUADRANTS.find(q => q.id === t.quadrant);
+  const canComplete = !!(t.quadrant && t.title.trim());
+  const row = document.querySelector(`.task-row[data-id="${id}"]`);
+  if (!row) return;
 
-  return (
-    <div style={{ background: task.done ? "#F6FAF7" : "#fff", border: `1px solid ${task.done ? "#A8D5B5" : isActive ? "#1C2B3A" : "#E4E8EB"}`, borderRadius: "6px", overflow: "hidden", transition: "all 0.2s", opacity: task.done ? 0.85 : 1 }}>
-      <div style={{ display: "grid", gridTemplateColumns: "32px auto 1fr auto auto auto", alignItems: "center", gap: "10px", padding: "12px 16px" }}>
-        <div style={{ fontFamily: "monospace", fontSize: "11px", color: "#B0BAC0", fontWeight: 700 }}>T{String(task.id).padStart(2, "0")}</div>
-        <button onClick={(e) => { e.stopPropagation(); if (canComplete) toggleDone(task.id); }} title={canComplete ? (task.done ? "Mark incomplete" : "Mark complete") : "Assign quadrant first"}
-          style={{ width: "20px", height: "20px", borderRadius: "4px", border: `2px solid ${task.done ? "#2E7D52" : canComplete ? "#B0BAC0" : "#E4E8EB"}`, background: task.done ? "#2E7D52" : "#fff", cursor: canComplete ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
-          {task.done && <span style={{ color: "#fff", fontSize: "12px", lineHeight: 1, fontWeight: 700 }}>✓</span>}
-        </button>
-        <div onClick={onToggle} style={{ fontSize: "14px", color: task.done ? "#7A8C96" : task.title ? "#1C2B3A" : "#B0BAC0", fontWeight: task.title ? 500 : 400, cursor: "pointer", textDecoration: task.done ? "line-through" : "none" }}>
-          {task.title || "Untitled task"}
-          {task.done && task.completedAt && <span style={{ fontSize: "10px", marginLeft: "8px", color: "#2E7D52", fontWeight: 600, textDecoration: "none" }}>✓ {task.completedAt}</span>}
-        </div>
-        {task.type && <div style={{ fontSize: "10px", background: "#F0F4F7", color: "#3D5A73", padding: "2px 8px", borderRadius: "10px", fontWeight: 600, letterSpacing: "0.5px" }}>{task.type}</div>}
-        <div style={{ fontSize: "12px", color: "#7A8C96", fontVariantNumeric: "tabular-nums" }}>{task.hours}h</div>
-        {q ? (
-          <div style={{ fontSize: "10px", background: q.light, color: q.accent, padding: "2px 8px", borderRadius: "3px", fontWeight: 700, letterSpacing: "1px", border: `1px solid ${q.border}20` }}>{q.label}</div>
-        ) : (
-          <div onClick={onToggle} style={{ fontSize: "10px", color: "#D0D5D9", border: "1px dashed #D0D5D9", padding: "2px 8px", borderRadius: "3px", letterSpacing: "1px", cursor: "pointer" }}>UNSET</div>
-        )}
-      </div>
-      {isActive && (
-        <div style={{ padding: "0 16px 16px", borderTop: "1px solid #F0F4F7", display: "grid", gap: "12px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "12px" }}>
-            <div>
-              <label style={labelStyle}>Task title</label>
-              <input value={task.title} onChange={(e) => updateTask(task.id, "title", e.target.value)} placeholder="Describe the task..." style={inputStyle} />
+  // Update row class
+  row.className = t.done ? 'task-row done-row' : (activeTaskId === id ? 'task-row active-row' : 'task-row');
+
+  const summary = row.querySelector('.task-row-summary');
+  const cbEl = summary.querySelector('[data-check]');
+  cbEl.className = t.done ? 'task-checkbox checked' : (canComplete ? 'task-checkbox' : 'task-checkbox disabled');
+
+  const titleEl = summary.querySelector('.task-title-cell, .task-title-cell.empty, .task-title-cell.done-title');
+  if (titleEl) {
+    titleEl.className = t.done ? 'task-title-cell done-title' : (t.title ? 'task-title-cell' : 'task-title-cell empty');
+    titleEl.innerHTML = esc(t.title) || 'Untitled task';
+    if (t.done && t.completedAt) {
+      titleEl.innerHTML += `<span class="completed-at">✓ ${esc(t.completedAt)}</span>`;
+    }
+  }
+
+  // type badge
+  let typeBadge = summary.querySelector('.task-type-badge');
+  if (t.type) {
+    if (!typeBadge) {
+      typeBadge = document.createElement('span');
+      typeBadge.className = 'task-type-badge';
+      summary.insertBefore(typeBadge, summary.children[3]);
+    }
+    typeBadge.textContent = t.type;
+  } else if (typeBadge) { typeBadge.remove(); }
+
+  // hours
+  const hrsEl = summary.querySelector('.task-hours-cell');
+  if (hrsEl) hrsEl.textContent = t.hours + 'h';
+
+  // quadrant badge
+  const lastChild = summary.lastElementChild;
+  if (q) {
+    lastChild.className = 'task-quadrant-badge';
+    lastChild.style.background = q.light;
+    lastChild.style.color = q.accent;
+    lastChild.style.border = `1px solid ${q.border}20`;
+    lastChild.textContent = q.label;
+  } else {
+    lastChild.className = 'task-quadrant-unset';
+    lastChild.style = '';
+    lastChild.textContent = 'UNSET';
+  }
+}
+
+// ── Render: Matrix View ────────────────────────────────────────────────────
+function renderMatrixView() {
+  const at = assignedTasks(), ct = completedTasks();
+  const totalH = at.reduce((s,t) => s + t.hours, 0);
+  const doneH  = ct.reduce((s,t) => s + t.hours, 0);
+  const pct    = at.length > 0 ? Math.round(ct.length / at.length * 100) : 0;
+
+  document.getElementById('matrix-date-label').textContent =
+    'EXECUTION MATRIX — ' + formatDate(document.getElementById('date-input').value).toUpperCase();
+  document.getElementById('completion-pct').textContent = pct + '% complete';
+
+  // Quadrant cards
+  const grid = document.getElementById('matrix-grid');
+  grid.innerHTML = QUADRANTS.map(q => {
+    const qt     = quadrantTasks(q.id);
+    const qTotalH = qt.reduce((s,t) => s + t.hours, 0);
+    const qDoneH  = qt.filter(t => t.done).reduce((s,t) => s + t.hours, 0);
+    const qDoneC  = qt.filter(t => t.done).length;
+
+    const taskRows = qt.length === 0
+      ? `<div class="quadrant-empty">No tasks assigned</div>`
+      : qt.map(t => `
+          <div class="matrix-task ${t.done?'done-task':''}" data-matrix-check="${t.id}">
+            <div class="matrix-cb ${t.done?'checked':''}" style="border-color:${t.done?'#2E7D52':q.dot}">✓</div>
+            <div class="matrix-task-body">
+              <div class="matrix-task-top">
+                <div class="matrix-task-title ${t.done?'done-title':''}">${esc(t.title)}</div>
+                <div class="matrix-task-hrs ${t.done?'done-hrs':''}">${t.hours}h</div>
+              </div>
+              <div class="matrix-task-meta">
+                ${t.type  ? `<span class="meta-type">${esc(t.type)}</span>` : ''}
+                ${t.notes ? `<span class="meta-notes">${esc(t.notes)}</span>` : ''}
+                ${t.done && t.completedAt ? `<span class="meta-time">✓ ${esc(t.completedAt)}</span>` : ''}
+              </div>
             </div>
-            <div>
-              <label style={labelStyle}>Task type</label>
-              <select value={task.type} onChange={(e) => updateTask(task.id, "type", e.target.value)} style={inputStyle}>
-                <option value="">Select type</option>
-                {TASK_TYPES.map((t) => <option key={t}>{t}</option>)}
-              </select>
-            </div>
-          </div>
+          </div>`).join('');
+
+    return `
+      <div class="quadrant-card" style="border:1px solid ${q.border}30">
+        <div class="quadrant-header" style="background:${q.light};border-bottom:2px solid ${q.accent}">
           <div>
-            <label style={labelStyle}>Notes (optional)</label>
-            <input value={task.notes} onChange={(e) => updateTask(task.id, "notes", e.target.value)} placeholder="Context, dependencies, next move..." style={inputStyle} />
+            <div class="quadrant-header-label" style="color:${q.accent}">${q.label}</div>
+            <div class="quadrant-header-sub">${q.sub}</div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-            <div>
-              <label style={labelStyle}>Time estimate</label>
-              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                {HOUR_OPTIONS.map((h) => (
-                  <button key={h} onClick={() => updateTask(task.id, "hours", h)}
-                    style={{ padding: "5px 10px", borderRadius: "4px", border: "1px solid", borderColor: task.hours === h ? "#1C2B3A" : "#E4E8EB", background: task.hours === h ? "#1C2B3A" : "#fff", color: task.hours === h ? "#fff" : "#7A8C96", fontSize: "12px", cursor: "pointer", fontWeight: task.hours === h ? 600 : 400 }}>
-                    {h}h
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label style={labelStyle}>Assign to quadrant</label>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
-                {QUADRANTS.map((q) => (
-                  <button key={q.id} onClick={() => updateTask(task.id, "quadrant", task.quadrant === q.id ? "" : q.id)}
-                    style={{ padding: "6px 8px", borderRadius: "4px", border: "1px solid", borderColor: task.quadrant === q.id ? q.accent : "#E4E8EB", background: task.quadrant === q.id ? q.light : "#fff", color: task.quadrant === q.id ? q.accent : "#7A8C96", fontSize: "10px", cursor: "pointer", fontWeight: 700, letterSpacing: "0.5px", textAlign: "center" }}>
-                    {q.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+          <div class="quadrant-header-right">
+            <div class="quadrant-hours" style="color:${q.accent}">${qTotalH > 0 ? qTotalH+'h' : ''}</div>
+            ${qDoneC > 0 ? `<div class="quadrant-done-hours">${qDoneH}h done</div>` : ''}
           </div>
         </div>
-      )}
+        <div class="quadrant-body">${taskRows}</div>
+      </div>`;
+  }).join('');
+
+  // Attach matrix checkbox events
+  document.querySelectorAll('[data-matrix-check]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = parseInt(el.dataset.matrixCheck);
+      const t = tasks.find(t => t.id === id);
+      t.done = !t.done;
+      t.completedAt = t.done
+        ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+        : null;
+      renderAll();
+    });
+  });
+
+  // Unassigned
+  const unassigned = tasks.filter(t => !t.quadrant && t.title.trim());
+  const uSec = document.getElementById('unassigned-section');
+  if (unassigned.length > 0) {
+    uSec.style.display = 'block';
+    document.getElementById('unassigned-list').innerHTML =
+      unassigned.map(t => `<div class="unassigned-item">${esc(t.title)}</div>`).join('');
+  } else { uSec.style.display = 'none'; }
+
+  // Summary footer
+  const footer = document.getElementById('summary-footer');
+  const footerCols = QUADRANTS.map(q => {
+    const qt = quadrantTasks(q.id);
+    const cnt = qt.length, doneCnt = qt.filter(t=>t.done).length;
+    const hrs = qt.reduce((s,t) => s + t.hours, 0);
+    const val = doneCnt > 0
+      ? `<span style="color:#2E7D52">${doneCnt}</span><span style="color:#3D5A73">/${cnt}</span>`
+      : cnt;
+    return `<div class="footer-col">
+      <div class="footer-col-label">${q.label}</div>
+      <div class="footer-col-value">${val}</div>
+      <div class="footer-col-sub">${hrs > 0 ? hrs+'h' : '--'}</div>
+    </div>`;
+  }).join('');
+
+  footer.innerHTML = footerCols +
+    `<div class="footer-divider"></div>
+    <div class="footer-col">
+      <div class="footer-col-label">COMPLETED</div>
+      <div class="footer-col-value" style="color:#2E7D52">${doneH.toFixed(1)}h</div>
+      <div class="footer-col-sub">${ct.length} tasks</div>
     </div>
-  );
+    <div class="footer-col">
+      <div class="footer-col-label">PROGRESS</div>
+      <div class="footer-col-value" style="color:${pct===100?'#2E7D52':'#F0F4F7'}">${pct}%</div>
+      <div class="footer-col-sub">${totalH.toFixed(1)}h total</div>
+    </div>`;
 }
 
-// ── Matrix View ───────────────────────────────────────────────────────────────
-function MatrixView({ tasks, quadrantTasks, toggleDone, date, formatDate, hoursCompleted, totalHours, completedTasks, assignedTasks }) {
-  const unassigned = tasks.filter((t) => !t.quadrant && t.title.trim());
-  const completionPct = assignedTasks.length > 0 ? Math.round((completedTasks.length / assignedTasks.length) * 100) : 0;
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <div style={{ fontSize: "11px", letterSpacing: "2px", color: "#7A8C96", fontWeight: 600 }}>EXECUTION MATRIX — {formatDate(date).toUpperCase()}</div>
-        <div style={{ fontSize: "12px", color: "#2E7D52", fontWeight: 700 }}>{completionPct}% complete</div>
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-        {QUADRANTS.map((q) => {
-          const qtasks = quadrantTasks(q.id);
-          const totalH = qtasks.reduce((s, t) => s + t.hours, 0);
-          const doneH = qtasks.filter((t) => t.done).reduce((s, t) => s + t.hours, 0);
-          const doneCount = qtasks.filter((t) => t.done).length;
-          return (
-            <div key={q.id} style={{ background: "#fff", border: `1px solid ${q.border}30`, borderRadius: "8px", overflow: "hidden" }}>
-              <div style={{ background: q.light, borderBottom: `2px solid ${q.accent}`, padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", color: q.accent }}>{q.label}</div>
-                  <div style={{ fontSize: "10px", color: "#7A8C96", marginTop: "2px" }}>{q.sub}</div>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{ fontSize: "12px", color: q.accent, fontWeight: 700 }}>{totalH > 0 ? `${totalH}h` : ""}</div>
-                  {doneCount > 0 && <div style={{ fontSize: "10px", color: "#2E7D52", fontWeight: 600 }}>{doneH}h done</div>}
-                </div>
-              </div>
-              <div style={{ padding: "4px 0", minHeight: "80px" }}>
-                {qtasks.length === 0 ? (
-                  <div style={{ padding: "16px", fontSize: "12px", color: "#D0D5D9", fontStyle: "italic" }}>No tasks assigned</div>
-                ) : (
-                  qtasks.map((t) => (
-                    <div key={t.id} onClick={() => toggleDone(t.id)}
-                      style={{ padding: "10px 16px", borderBottom: "1px solid #F5F6F7", display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", background: t.done ? "#F6FAF7" : "#fff", transition: "background 0.15s" }}>
-                      <div style={{ width: "18px", height: "18px", borderRadius: "3px", border: `2px solid ${t.done ? "#2E7D52" : q.dot}`, background: t.done ? "#2E7D52" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "2px", transition: "all 0.15s" }}>
-                        {t.done && <span style={{ color: "#fff", fontSize: "11px", fontWeight: 700, lineHeight: 1 }}>✓</span>}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
-                          <div style={{ fontSize: "13px", fontWeight: 500, color: t.done ? "#7A8C96" : "#1C2B3A", textDecoration: t.done ? "line-through" : "none" }}>{t.title}</div>
-                          <div style={{ fontSize: "11px", color: t.done ? "#2E7D52" : "#7A8C96", fontVariantNumeric: "tabular-nums", flexShrink: 0, fontWeight: t.done ? 700 : 400 }}>{t.hours}h</div>
-                        </div>
-                        <div style={{ display: "flex", gap: "6px", marginTop: "3px", flexWrap: "wrap", alignItems: "center" }}>
-                          {t.type && <span style={{ fontSize: "10px", color: "#7A8C96", background: "#F5F6F7", padding: "1px 6px", borderRadius: "8px" }}>{t.type}</span>}
-                          {t.notes && <span style={{ fontSize: "10px", color: "#B0BAC0", fontStyle: "italic" }}>{t.notes}</span>}
-                          {t.done && t.completedAt && <span style={{ fontSize: "10px", color: "#2E7D52", fontWeight: 600 }}>✓ {t.completedAt}</span>}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      {unassigned.length > 0 && (
-        <div style={{ marginTop: "16px", background: "#FFF8F0", border: "1px solid #F0D9C0", borderRadius: "6px", padding: "12px 16px" }}>
-          <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#C08050", fontWeight: 700, marginBottom: "8px" }}>UNASSIGNED</div>
-          {unassigned.map((t) => (
-            <div key={t.id} style={{ fontSize: "13px", color: "#7A5A40", padding: "4px 0", borderBottom: "1px solid #F0E0D0" }}>{t.title}</div>
-          ))}
-        </div>
-      )}
-      <div style={{ marginTop: "16px", background: "#1C2B3A", borderRadius: "6px", padding: "14px 20px", display: "grid", gridTemplateColumns: "repeat(4, 1fr) 1px repeat(2, 1fr)", gap: "12px", alignItems: "center" }}>
-        {QUADRANTS.map((q) => {
-          const qtasks = quadrantTasks(q.id);
-          const count = qtasks.length;
-          const doneCount = qtasks.filter((t) => t.done).length;
-          const hrs = qtasks.reduce((s, t) => s + t.hours, 0);
-          return (
-            <div key={q.id} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "9px", letterSpacing: "1.5px", color: "#7A8C96", fontWeight: 600 }}>{q.label}</div>
-              <div style={{ fontSize: "18px", fontWeight: 700, color: "#F0F4F7", marginTop: "2px" }}>
-                {doneCount > 0 ? <><span style={{ color: "#2E7D52" }}>{doneCount}</span><span style={{ color: "#3D5A73" }}>/{count}</span></> : count}
-              </div>
-              <div style={{ fontSize: "10px", color: "#3D5A73" }}>{hrs > 0 ? `${hrs}h` : "--"}</div>
-            </div>
-          );
-        })}
-        <div style={{ background: "#2A3A4A", width: "1px", height: "40px", margin: "0 auto" }} />
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "9px", letterSpacing: "1.5px", color: "#7A8C96", fontWeight: 600 }}>COMPLETED</div>
-          <div style={{ fontSize: "18px", fontWeight: 700, color: "#2E7D52", marginTop: "2px" }}>{hoursCompleted.toFixed(1)}h</div>
-          <div style={{ fontSize: "10px", color: "#3D5A73" }}>{completedTasks.length} tasks</div>
-        </div>
-        <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: "9px", letterSpacing: "1.5px", color: "#7A8C96", fontWeight: 600 }}>PROGRESS</div>
-          <div style={{ fontSize: "18px", fontWeight: 700, color: completionPct === 100 ? "#2E7D52" : "#F0F4F7", marginTop: "2px" }}>{completionPct}%</div>
-          <div style={{ fontSize: "10px", color: "#3D5A73" }}>{totalHours.toFixed(1)}h total</div>
-        </div>
-      </div>
-    </div>
-  );
+// ── Render All ─────────────────────────────────────────────────────────────
+function renderAll() {
+  renderBudget();
+  renderFooterDate();
+  if (currentView === 'input') renderInputView();
+  else renderMatrixView();
 }
 
-const labelStyle = { display: "block", fontSize: "10px", letterSpacing: "1.5px", color: "#7A8C96", fontWeight: 600, marginBottom: "6px" };
-const inputStyle = { width: "100%", padding: "8px 10px", border: "1px solid #E4E8EB", borderRadius: "4px", fontSize: "13px", color: "#1C2B3A", background: "#FAFAFA", outline: "none", boxSizing: "border-box" };
+// ── View Switching ─────────────────────────────────────────────────────────
+function setView(v) {
+  currentView = v;
+  document.getElementById('view-input').classList.toggle('hidden', v !== 'input');
+  document.getElementById('view-matrix').classList.toggle('hidden', v !== 'matrix');
+  document.querySelectorAll('.view-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === v);
+  });
+  if (v === 'matrix') renderMatrixView();
+}
+
+document.querySelectorAll('.view-btn').forEach(btn => {
+  btn.addEventListener('click', () => setView(btn.dataset.view));
+});
+
+// ── Reset ──────────────────────────────────────────────────────────────────
+function doReset() {
+  tasks = Array.from({ length: 10 }, (_, i) => emptyTask(i + 1));
+  activeTaskId = null;
+  setView('input');
+  renderAll();
+}
+document.getElementById('reset-btn').addEventListener('click', doReset);
+
+// ── Date Input ─────────────────────────────────────────────────────────────
+document.getElementById('date-input').value = getTodayISO();
+document.getElementById('date-input').addEventListener('change', () => {
+  renderFooterDate();
+  if (currentView === 'matrix') renderMatrixView();
+});
+
+// ── New Day Modal ──────────────────────────────────────────────────────────
+document.getElementById('new-day-btn').addEventListener('click', () => {
+  const incomplete = incompleteTasks();
+  modalSelectedIds = new Set(incomplete.map(t => t.id));
+  renderModal(incomplete);
+  document.getElementById('modal-overlay').classList.add('open');
+});
+
+document.getElementById('modal-cancel').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+});
+
+document.getElementById('modal-toggle-all').addEventListener('click', () => {
+  const incomplete = incompleteTasks();
+  if (modalSelectedIds.size === incomplete.length) {
+    modalSelectedIds = new Set();
+  } else {
+    modalSelectedIds = new Set(incomplete.map(t => t.id));
+  }
+  renderModalTaskList(incomplete);
+  updateModalSummary(incomplete);
+  updateModalToggleAllBtn(incomplete);
+  updateModalConfirmBtn(incomplete);
+});
+
+document.getElementById('modal-confirm').addEventListener('click', () => {
+  const incomplete = incompleteTasks();
+  const carried = incomplete.filter(t => modalSelectedIds.has(t.id));
+  const newTasks = Array.from({ length: 10 }, (_, i) => {
+    if (i < carried.length) {
+      const s = carried[i];
+      return { ...emptyTask(i + 1), title: s.title, hours: s.hours, type: s.type, quadrant: s.quadrant, notes: s.notes };
+    }
+    return emptyTask(i + 1);
+  });
+  tasks = newTasks;
+  activeTaskId = null;
+  document.getElementById('date-input').value = getTomorrowISO();
+  document.getElementById('modal-overlay').classList.remove('open');
+  setView('input');
+  renderAll();
+});
+
+function renderModal(incomplete) {
+  const hasInc = incomplete.length > 0;
+  const desc = document.getElementById('modal-desc');
+  const incSection = document.getElementById('modal-incomplete-section');
+
+  if (hasInc) {
+    desc.innerHTML = `You have <strong>${incomplete.length} incomplete ${incomplete.length===1?'task':'tasks'}</strong>. Select which ones to carry forward into tomorrow — they will be transferred with their details intact, but completion status and timestamps will reset.`;
+    incSection.style.display = 'block';
+    renderModalTaskList(incomplete);
+    updateModalSummary(incomplete);
+    updateModalToggleAllBtn(incomplete);
+  } else {
+    desc.textContent = 'All tasks are complete. Starting a fresh new day will clear everything. Ready to go?';
+    incSection.style.display = 'none';
+  }
+  updateModalConfirmBtn(incomplete);
+}
+
+function renderModalTaskList(incomplete) {
+  const list = document.getElementById('modal-task-list');
+  list.innerHTML = incomplete.map(t => {
+    const q = QUADRANTS.find(q => q.id === t.quadrant);
+    const sel = modalSelectedIds.has(t.id);
+    return `<div class="modal-task-item ${sel?'selected':''}" data-modal-task="${t.id}">
+      <div class="modal-cb ${sel?'checked':''}">✓</div>
+      <div>
+        <div class="modal-task-title">${esc(t.title)}</div>
+        <div class="modal-task-meta">
+          ${q ? `<span style="font-size:10px;color:${q.accent};font-weight:700;letter-spacing:0.5px">${q.label}</span>` : ''}
+          ${t.type ? `<span style="font-size:10px;color:#7A8C96">${esc(t.type)}</span>` : ''}
+          <span style="font-size:10px;color:#B0BAC0">${t.hours}h</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('[data-modal-task]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = parseInt(el.dataset.modalTask);
+      modalSelectedIds.has(id) ? modalSelectedIds.delete(id) : modalSelectedIds.add(id);
+      el.classList.toggle('selected', modalSelectedIds.has(id));
+      el.querySelector('.modal-cb').classList.toggle('checked', modalSelectedIds.has(id));
+      updateModalSummary(incomplete);
+      updateModalToggleAllBtn(incomplete);
+      updateModalConfirmBtn(incomplete);
+    });
+  });
+}
+
+function updateModalSummary(incomplete) {
+  const sum = document.getElementById('modal-summary');
+  const n = modalSelectedIds.size;
+  if (n > 0) {
+    sum.style.display = 'block';
+    sum.innerHTML = `<strong>${n}</strong> task${n!==1?'s':''} will carry forward · remaining ${10-n} slot${10-n!==1?'s':''} will be blank`;
+  } else { sum.style.display = 'none'; }
+}
+
+function updateModalToggleAllBtn(incomplete) {
+  document.getElementById('modal-toggle-all').textContent =
+    modalSelectedIds.size === incomplete.length ? 'DESELECT ALL' : 'SELECT ALL';
+}
+
+function updateModalConfirmBtn(incomplete) {
+  const hasInc = incomplete.length > 0;
+  document.getElementById('modal-confirm').textContent =
+    (hasInc && modalSelectedIds.size > 0) ? 'Start New Day →' : 'Start Fresh →';
+}
+
+// ── Boot ───────────────────────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>
