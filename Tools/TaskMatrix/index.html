@@ -755,6 +755,7 @@
     <button class="view-btn active" data-view="input">INPUT</button>
     <button class="view-btn" data-view="matrix">MATRIX</button>
     <button id="new-day-btn">＋ NEW DAY</button>
+    <button id="export-btn" style="padding:6px 16px;border-radius:4px;border:1px solid #7A8C96;background:transparent;color:#7A8C96;font-size:12px;font-weight:700;letter-spacing:1px;cursor:pointer;white-space:nowrap;">↓ EXPORT CSV</button>
     <span id="saved-indicator" style="font-size:10px;letter-spacing:1px;color:#2E7D52;font-weight:600;opacity:0;transition:opacity 0.4s;white-space:nowrap;">✓ SAVED</span>
   </div>
 </div>
@@ -1452,6 +1453,44 @@ function updateModalConfirmBtn(incomplete) {
   document.getElementById('modal-confirm').textContent =
     (hasInc && modalSelectedIds.size > 0) ? 'Start New Day →' : 'Start Fresh →';
 }
+
+// ── Export CSV ─────────────────────────────────────────────────────────────
+document.getElementById('export-btn').addEventListener('click', () => {
+  // Collect all saved days from localStorage — current day plus any prior exports
+  // For now we export the current loaded state; extend later for multi-day history
+  const dateVal  = document.getElementById('date-input').value;
+  const dateLabel = formatDate(dateVal); // e.g. "Monday, 9 June 2026"
+
+  const rows = [['Date', 'Task', 'Hours', 'Completed At']];
+
+  tasks
+    .filter(t => t.title.trim() && t.quadrant)
+    .forEach(t => {
+      rows.push([
+        dateLabel,
+        t.title.trim(),
+        t.hours,
+        t.done && t.completedAt ? t.completedAt : ''
+      ]);
+    });
+
+  if (rows.length === 1) {
+    alert('No assigned tasks to export.');
+    return;
+  }
+
+  const csv = rows.map(r =>
+    r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+  ).join('\r\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `timesheet_${dateVal}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 const restored = loadState();
