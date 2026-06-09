@@ -1,1 +1,452 @@
-tools/first-tool/index.html
+Tools/TaskMatrix/index.html
+import { useState, useCallback } from "react";
+
+const QUADRANTS = [
+  { id: "do-first", label: "DO FIRST", sub: "Urgent + High Impact", accent: "#1C2B3A", light: "#EEF2F6", border: "#1C2B3A", dot: "#1C2B3A" },
+  { id: "schedule", label: "SCHEDULE", sub: "Not Urgent + High Impact", accent: "#3D5A73", light: "#F0F4F7", border: "#3D5A73", dot: "#3D5A73" },
+  { id: "delegate", label: "DELEGATE", sub: "Urgent + Lower Impact", accent: "#7A8C96", light: "#F5F6F7", border: "#7A8C96", dot: "#7A8C96" },
+  { id: "defer", label: "DEFER", sub: "Not Urgent + Lower Impact", accent: "#B0BAC0", light: "#F8F9FA", border: "#B0BAC0", dot: "#B0BAC0" },
+];
+
+const HOUR_OPTIONS = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4];
+const MAX_HOURS = 9;
+const TASK_TYPES = ["Drafting", "Research", "Decision", "Follow-up", "Meeting", "Review", "Admin"];
+
+const emptyTask = (id) => ({ id, title: "", hours: 1, type: "", quadrant: "", notes: "", done: false, completedAt: null });
+const initialTasks = Array.from({ length: 10 }, (_, i) => emptyTask(i + 1));
+
+const getTomorrowDate = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().split("T")[0];
+};
+
+// ── New Day Modal ────────────────────────────────────────────────────────────
+function NewDayModal({ incompleteTasks, onConfirm, onClose }) {
+  const [selected, setSelected] = useState(() => new Set(incompleteTasks.map((t) => t.id)));
+
+  const toggleSelect = (id) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    if (selected.size === incompleteTasks.length) setSelected(new Set());
+    else setSelected(new Set(incompleteTasks.map((t) => t.id)));
+  };
+
+  const hasIncomplete = incompleteTasks.length > 0;
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(10,18,26,0.75)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+      <div style={{ background: "#fff", borderRadius: "12px", width: "100%", maxWidth: "480px", overflow: "hidden", boxShadow: "0 24px 60px rgba(0,0,0,0.3)" }}>
+        {/* Modal header */}
+        <div style={{ background: "#1C2B3A", padding: "20px 24px" }}>
+          <div style={{ fontSize: "10px", letterSpacing: "3px", color: "#7A8C96", marginBottom: "4px", fontWeight: 600 }}>NEW DAY</div>
+          <div style={{ fontSize: "18px", fontWeight: 700, color: "#F0F4F7" }}>Start fresh tomorrow</div>
+        </div>
+
+        <div style={{ padding: "20px 24px" }}>
+          {hasIncomplete ? (
+            <>
+              <p style={{ fontSize: "13px", color: "#3D5A73", margin: "0 0 16px", lineHeight: 1.6 }}>
+                You have <strong>{incompleteTasks.length} incomplete {incompleteTasks.length === 1 ? "task" : "tasks"}</strong>. Select which ones to carry forward into tomorrow — they will be transferred with their details intact, but completion status and timestamps will reset.
+              </p>
+
+              {/* Select all toggle */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                <div style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#7A8C96", fontWeight: 600 }}>CARRY FORWARD</div>
+                <button onClick={toggleAll} style={{ fontSize: "11px", color: "#3D5A73", background: "transparent", border: "none", cursor: "pointer", fontWeight: 600, letterSpacing: "0.5px" }}>
+                  {selected.size === incompleteTasks.length ? "DESELECT ALL" : "SELECT ALL"}
+                </button>
+              </div>
+
+              {/* Task list */}
+              <div style={{ display: "grid", gap: "6px", maxHeight: "260px", overflowY: "auto", marginBottom: "20px" }}>
+                {incompleteTasks.map((t) => {
+                  const q = QUADRANTS.find((q) => q.id === t.quadrant);
+                  const isSelected = selected.has(t.id);
+                  return (
+                    <div key={t.id} onClick={() => toggleSelect(t.id)}
+                      style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 12px", borderRadius: "6px", border: `1px solid ${isSelected ? "#1C2B3A" : "#E4E8EB"}`, background: isSelected ? "#EEF2F6" : "#FAFAFA", cursor: "pointer", transition: "all 0.15s" }}>
+                      <div style={{ width: "18px", height: "18px", borderRadius: "4px", border: `2px solid ${isSelected ? "#1C2B3A" : "#B0BAC0"}`, background: isSelected ? "#1C2B3A" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
+                        {isSelected && <span style={{ color: "#fff", fontSize: "11px", fontWeight: 700 }}>✓</span>}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: "13px", fontWeight: 500, color: "#1C2B3A" }}>{t.title}</div>
+                        <div style={{ display: "flex", gap: "8px", marginTop: "3px" }}>
+                          {q && <span style={{ fontSize: "10px", color: q.accent, fontWeight: 700, letterSpacing: "0.5px" }}>{q.label}</span>}
+                          {t.type && <span style={{ fontSize: "10px", color: "#7A8C96" }}>{t.type}</span>}
+                          <span style={{ fontSize: "10px", color: "#B0BAC0" }}>{t.hours}h</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {selected.size > 0 && (
+                <div style={{ background: "#F0F4F7", borderRadius: "6px", padding: "10px 14px", marginBottom: "16px", fontSize: "12px", color: "#3D5A73" }}>
+                  <strong>{selected.size}</strong> task{selected.size !== 1 ? "s" : ""} will carry forward · remaining {10 - selected.size} slot{10 - selected.size !== 1 ? "s" : ""} will be blank
+                </div>
+              )}
+            </>
+          ) : (
+            <p style={{ fontSize: "13px", color: "#3D5A73", margin: "0 0 20px", lineHeight: 1.6 }}>
+              All tasks are complete. Starting a fresh new day will clear everything. Ready to go?
+            </p>
+          )}
+
+          {/* Actions */}
+          <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+            <button onClick={onClose}
+              style={{ padding: "9px 20px", borderRadius: "6px", border: "1px solid #E4E8EB", background: "#fff", color: "#7A8C96", fontSize: "13px", cursor: "pointer", fontWeight: 600 }}>
+              Cancel
+            </button>
+            <button onClick={() => onConfirm(selected)}
+              style={{ padding: "9px 20px", borderRadius: "6px", border: "none", background: "#1C2B3A", color: "#F0F4F7", fontSize: "13px", cursor: "pointer", fontWeight: 600, letterSpacing: "0.5px" }}>
+              {hasIncomplete && selected.size > 0 ? `Start New Day →` : "Start Fresh →"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main App ─────────────────────────────────────────────────────────────────
+export default function PriorityMatrix() {
+  const [tasks, setTasks] = useState(initialTasks);
+  const [activeTask, setActiveTask] = useState(null);
+  const [view, setView] = useState("input");
+  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [showNewDayModal, setShowNewDayModal] = useState(false);
+
+  const assignedTasks = tasks.filter((t) => t.quadrant && t.title.trim());
+  const completedTasks = assignedTasks.filter((t) => t.done);
+  const incompleteTasks = assignedTasks.filter((t) => !t.done);
+  const totalHours = assignedTasks.reduce((s, t) => s + t.hours, 0);
+  const hoursCompleted = completedTasks.reduce((s, t) => s + t.hours, 0);
+  const hoursRemaining = totalHours - hoursCompleted;
+
+  const updateTask = useCallback((id, field, value) => {
+    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, [field]: value } : t)));
+  }, []);
+
+  const toggleDone = useCallback((id) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : null }
+          : t
+      )
+    );
+  }, []);
+
+  const handleNewDayClick = () => setShowNewDayModal(true);
+
+  const handleNewDayConfirm = (selectedIds) => {
+    const carried = incompleteTasks.filter((t) => selectedIds.has(t.id));
+    // Build new tasks: carried tasks fill first slots, rest are blank
+    const newTasks = Array.from({ length: 10 }, (_, i) => {
+      if (i < carried.length) {
+        const src = carried[i];
+        return { ...emptyTask(i + 1), title: src.title, hours: src.hours, type: src.type, quadrant: src.quadrant, notes: src.notes };
+      }
+      return emptyTask(i + 1);
+    });
+    setTasks(newTasks);
+    setDate(getTomorrowDate());
+    setView("input");
+    setActiveTask(null);
+    setShowNewDayModal(false);
+  };
+
+  const reset = () => { setTasks(initialTasks); setView("input"); setActiveTask(null); };
+
+  const formatDate = (iso) => {
+    const d = new Date(iso + "T12:00:00");
+    return d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  };
+
+  const totalBarPct = Math.min((totalHours / MAX_HOURS) * 100, 100);
+  const completedBarPct = Math.min((hoursCompleted / MAX_HOURS) * 100, 100);
+  const overBudget = totalHours > MAX_HOURS;
+  const allDone = assignedTasks.length > 0 && completedTasks.length === assignedTasks.length;
+  const quadrantTasks = (qid) => tasks.filter((t) => t.quadrant === qid && t.title.trim());
+
+  return (
+    <div style={{ fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif", background: "#FAFAFA", minHeight: "100vh" }}>
+      {showNewDayModal && (
+        <NewDayModal
+          incompleteTasks={incompleteTasks}
+          onConfirm={handleNewDayConfirm}
+          onClose={() => setShowNewDayModal(false)}
+        />
+      )}
+
+      {/* Header */}
+      <div style={{ background: "#1C2B3A", color: "#F0F4F7", padding: "20px 32px 16px", display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+        <div>
+          <div style={{ fontSize: "10px", letterSpacing: "3px", color: "#7A8C96", marginBottom: "4px", fontWeight: 600 }}>DAILY EXECUTION MATRIX</div>
+          <div style={{ fontSize: "22px", fontWeight: 700, letterSpacing: "-0.5px" }}>
+            Priority & Efficiency Planner
+            {allDone && <span style={{ marginLeft: "12px", fontSize: "13px", background: "#2E7D52", color: "#fff", padding: "3px 10px", borderRadius: "10px", fontWeight: 600, letterSpacing: "1px" }}>DAY COMPLETE</span>}
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
+            style={{ background: "transparent", border: "1px solid #3D5A73", color: "#F0F4F7", padding: "6px 10px", borderRadius: "4px", fontSize: "13px", cursor: "pointer" }} />
+          <div style={{ display: "flex", gap: "8px" }}>
+            {["input", "matrix"].map((v) => (
+              <button key={v} onClick={() => setView(v)} style={{ padding: "6px 16px", borderRadius: "4px", border: "none", cursor: "pointer", fontSize: "12px", fontWeight: 600, letterSpacing: "1px", background: view === v ? "#F0F4F7" : "transparent", color: view === v ? "#1C2B3A" : "#7A8C96" }}>
+                {v.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          {/* NEW DAY button */}
+          <button onClick={handleNewDayClick}
+            style={{ padding: "6px 16px", borderRadius: "4px", border: "1px solid #2E7D52", background: "transparent", color: "#2E7D52", fontSize: "12px", fontWeight: 700, letterSpacing: "1px", cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", transition: "all 0.15s", whiteSpace: "nowrap" }}>
+            ＋ NEW DAY
+          </button>
+        </div>
+      </div>
+
+      {/* Time budget bar */}
+      <div style={{ background: "#111D27", padding: "12px 32px 10px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "8px" }}>
+          <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#7A8C96", fontWeight: 600, whiteSpace: "nowrap" }}>TIME BUDGET</div>
+          <div style={{ flex: 1, height: "8px", background: "#2A3A4A", borderRadius: "4px", overflow: "hidden", position: "relative" }}>
+            <div style={{ position: "absolute", height: "100%", width: `${totalBarPct}%`, background: overBudget ? "#C0392B33" : "#3D5A7355", borderRadius: "4px" }} />
+            <div style={{ position: "absolute", height: "100%", width: `${completedBarPct}%`, background: overBudget ? "#C0392B" : "#2E7D52", borderRadius: "4px", transition: "width 0.4s ease" }} />
+          </div>
+          <div style={{ fontSize: "13px", fontWeight: 700, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+            <span style={{ color: "#2E7D52" }}>{hoursCompleted.toFixed(1)}h</span>
+            <span style={{ color: "#7A8C96", fontWeight: 400 }}> done · </span>
+            <span style={{ color: overBudget ? "#E74C3C" : "#F0F4F7" }}>{totalHours.toFixed(1)}h</span>
+            <span style={{ color: "#7A8C96", fontWeight: 400 }}> / {MAX_HOURS}h</span>
+          </div>
+          <div style={{ fontSize: "11px", color: "#7A8C96", whiteSpace: "nowrap" }}>{completedTasks.length}/{assignedTasks.length} done</div>
+          <button onClick={reset} style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#7A8C96", background: "transparent", border: "1px solid #2A3A4A", padding: "4px 10px", borderRadius: "3px", cursor: "pointer", fontWeight: 600 }}>RESET</button>
+        </div>
+        <div style={{ display: "flex", gap: "16px" }}>
+          {[
+            { label: "REMAINING", value: `${hoursRemaining.toFixed(1)}h`, color: hoursRemaining > 0 ? "#7A8C96" : "#2E7D52" },
+            { label: "COMPLETED", value: `${hoursCompleted.toFixed(1)}h`, color: "#2E7D52" },
+            { label: "TASKS LEFT", value: `${assignedTasks.length - completedTasks.length}`, color: "#7A8C96" },
+          ].map((s) => (
+            <div key={s.label} style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ fontSize: "9px", letterSpacing: "1.5px", color: "#3D5A73", fontWeight: 600 }}>{s.label}</span>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: s.color }}>{s.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: "24px 32px" }}>
+        {view === "input" ? (
+          <InputView tasks={tasks} updateTask={updateTask} toggleDone={toggleDone} activeTask={activeTask} setActiveTask={setActiveTask} />
+        ) : (
+          <MatrixView tasks={tasks} quadrantTasks={quadrantTasks} toggleDone={toggleDone} date={date} formatDate={formatDate} hoursCompleted={hoursCompleted} totalHours={totalHours} completedTasks={completedTasks} assignedTasks={assignedTasks} />
+        )}
+      </div>
+
+      <div style={{ padding: "0 32px 24px", fontSize: "11px", color: "#B0BAC0", letterSpacing: "0.5px" }}>
+        {formatDate(date)}
+      </div>
+    </div>
+  );
+}
+
+// ── Input View ────────────────────────────────────────────────────────────────
+function InputView({ tasks, updateTask, toggleDone, activeTask, setActiveTask }) {
+  return (
+    <div>
+      <div style={{ fontSize: "11px", letterSpacing: "2px", color: "#7A8C96", fontWeight: 600, marginBottom: "16px" }}>DEFINE YOUR 10 TASKS</div>
+      <div style={{ display: "grid", gap: "8px" }}>
+        {tasks.map((task) => (
+          <TaskRow key={task.id} task={task} updateTask={updateTask} toggleDone={toggleDone}
+            isActive={activeTask === task.id} onToggle={() => setActiveTask(activeTask === task.id ? null : task.id)} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Task Row ──────────────────────────────────────────────────────────────────
+function TaskRow({ task, updateTask, toggleDone, isActive, onToggle }) {
+  const q = QUADRANTS.find((q) => q.id === task.quadrant);
+  const canComplete = !!task.quadrant && !!task.title.trim();
+
+  return (
+    <div style={{ background: task.done ? "#F6FAF7" : "#fff", border: `1px solid ${task.done ? "#A8D5B5" : isActive ? "#1C2B3A" : "#E4E8EB"}`, borderRadius: "6px", overflow: "hidden", transition: "all 0.2s", opacity: task.done ? 0.85 : 1 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "32px auto 1fr auto auto auto", alignItems: "center", gap: "10px", padding: "12px 16px" }}>
+        <div style={{ fontFamily: "monospace", fontSize: "11px", color: "#B0BAC0", fontWeight: 700 }}>T{String(task.id).padStart(2, "0")}</div>
+        <button onClick={(e) => { e.stopPropagation(); if (canComplete) toggleDone(task.id); }} title={canComplete ? (task.done ? "Mark incomplete" : "Mark complete") : "Assign quadrant first"}
+          style={{ width: "20px", height: "20px", borderRadius: "4px", border: `2px solid ${task.done ? "#2E7D52" : canComplete ? "#B0BAC0" : "#E4E8EB"}`, background: task.done ? "#2E7D52" : "#fff", cursor: canComplete ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
+          {task.done && <span style={{ color: "#fff", fontSize: "12px", lineHeight: 1, fontWeight: 700 }}>✓</span>}
+        </button>
+        <div onClick={onToggle} style={{ fontSize: "14px", color: task.done ? "#7A8C96" : task.title ? "#1C2B3A" : "#B0BAC0", fontWeight: task.title ? 500 : 400, cursor: "pointer", textDecoration: task.done ? "line-through" : "none" }}>
+          {task.title || "Untitled task"}
+          {task.done && task.completedAt && <span style={{ fontSize: "10px", marginLeft: "8px", color: "#2E7D52", fontWeight: 600, textDecoration: "none" }}>✓ {task.completedAt}</span>}
+        </div>
+        {task.type && <div style={{ fontSize: "10px", background: "#F0F4F7", color: "#3D5A73", padding: "2px 8px", borderRadius: "10px", fontWeight: 600, letterSpacing: "0.5px" }}>{task.type}</div>}
+        <div style={{ fontSize: "12px", color: "#7A8C96", fontVariantNumeric: "tabular-nums" }}>{task.hours}h</div>
+        {q ? (
+          <div style={{ fontSize: "10px", background: q.light, color: q.accent, padding: "2px 8px", borderRadius: "3px", fontWeight: 700, letterSpacing: "1px", border: `1px solid ${q.border}20` }}>{q.label}</div>
+        ) : (
+          <div onClick={onToggle} style={{ fontSize: "10px", color: "#D0D5D9", border: "1px dashed #D0D5D9", padding: "2px 8px", borderRadius: "3px", letterSpacing: "1px", cursor: "pointer" }}>UNSET</div>
+        )}
+      </div>
+      {isActive && (
+        <div style={{ padding: "0 16px 16px", borderTop: "1px solid #F0F4F7", display: "grid", gap: "12px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "12px" }}>
+            <div>
+              <label style={labelStyle}>Task title</label>
+              <input value={task.title} onChange={(e) => updateTask(task.id, "title", e.target.value)} placeholder="Describe the task..." style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>Task type</label>
+              <select value={task.type} onChange={(e) => updateTask(task.id, "type", e.target.value)} style={inputStyle}>
+                <option value="">Select type</option>
+                {TASK_TYPES.map((t) => <option key={t}>{t}</option>)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style={labelStyle}>Notes (optional)</label>
+            <input value={task.notes} onChange={(e) => updateTask(task.id, "notes", e.target.value)} placeholder="Context, dependencies, next move..." style={inputStyle} />
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div>
+              <label style={labelStyle}>Time estimate</label>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                {HOUR_OPTIONS.map((h) => (
+                  <button key={h} onClick={() => updateTask(task.id, "hours", h)}
+                    style={{ padding: "5px 10px", borderRadius: "4px", border: "1px solid", borderColor: task.hours === h ? "#1C2B3A" : "#E4E8EB", background: task.hours === h ? "#1C2B3A" : "#fff", color: task.hours === h ? "#fff" : "#7A8C96", fontSize: "12px", cursor: "pointer", fontWeight: task.hours === h ? 600 : 400 }}>
+                    {h}h
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Assign to quadrant</label>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+                {QUADRANTS.map((q) => (
+                  <button key={q.id} onClick={() => updateTask(task.id, "quadrant", task.quadrant === q.id ? "" : q.id)}
+                    style={{ padding: "6px 8px", borderRadius: "4px", border: "1px solid", borderColor: task.quadrant === q.id ? q.accent : "#E4E8EB", background: task.quadrant === q.id ? q.light : "#fff", color: task.quadrant === q.id ? q.accent : "#7A8C96", fontSize: "10px", cursor: "pointer", fontWeight: 700, letterSpacing: "0.5px", textAlign: "center" }}>
+                    {q.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Matrix View ───────────────────────────────────────────────────────────────
+function MatrixView({ tasks, quadrantTasks, toggleDone, date, formatDate, hoursCompleted, totalHours, completedTasks, assignedTasks }) {
+  const unassigned = tasks.filter((t) => !t.quadrant && t.title.trim());
+  const completionPct = assignedTasks.length > 0 ? Math.round((completedTasks.length / assignedTasks.length) * 100) : 0;
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <div style={{ fontSize: "11px", letterSpacing: "2px", color: "#7A8C96", fontWeight: 600 }}>EXECUTION MATRIX — {formatDate(date).toUpperCase()}</div>
+        <div style={{ fontSize: "12px", color: "#2E7D52", fontWeight: 700 }}>{completionPct}% complete</div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+        {QUADRANTS.map((q) => {
+          const qtasks = quadrantTasks(q.id);
+          const totalH = qtasks.reduce((s, t) => s + t.hours, 0);
+          const doneH = qtasks.filter((t) => t.done).reduce((s, t) => s + t.hours, 0);
+          const doneCount = qtasks.filter((t) => t.done).length;
+          return (
+            <div key={q.id} style={{ background: "#fff", border: `1px solid ${q.border}30`, borderRadius: "8px", overflow: "hidden" }}>
+              <div style={{ background: q.light, borderBottom: `2px solid ${q.accent}`, padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "2px", color: q.accent }}>{q.label}</div>
+                  <div style={{ fontSize: "10px", color: "#7A8C96", marginTop: "2px" }}>{q.sub}</div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: "12px", color: q.accent, fontWeight: 700 }}>{totalH > 0 ? `${totalH}h` : ""}</div>
+                  {doneCount > 0 && <div style={{ fontSize: "10px", color: "#2E7D52", fontWeight: 600 }}>{doneH}h done</div>}
+                </div>
+              </div>
+              <div style={{ padding: "4px 0", minHeight: "80px" }}>
+                {qtasks.length === 0 ? (
+                  <div style={{ padding: "16px", fontSize: "12px", color: "#D0D5D9", fontStyle: "italic" }}>No tasks assigned</div>
+                ) : (
+                  qtasks.map((t) => (
+                    <div key={t.id} onClick={() => toggleDone(t.id)}
+                      style={{ padding: "10px 16px", borderBottom: "1px solid #F5F6F7", display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", background: t.done ? "#F6FAF7" : "#fff", transition: "background 0.15s" }}>
+                      <div style={{ width: "18px", height: "18px", borderRadius: "3px", border: `2px solid ${t.done ? "#2E7D52" : q.dot}`, background: t.done ? "#2E7D52" : "#fff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "2px", transition: "all 0.15s" }}>
+                        {t.done && <span style={{ color: "#fff", fontSize: "11px", fontWeight: 700, lineHeight: 1 }}>✓</span>}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "8px" }}>
+                          <div style={{ fontSize: "13px", fontWeight: 500, color: t.done ? "#7A8C96" : "#1C2B3A", textDecoration: t.done ? "line-through" : "none" }}>{t.title}</div>
+                          <div style={{ fontSize: "11px", color: t.done ? "#2E7D52" : "#7A8C96", fontVariantNumeric: "tabular-nums", flexShrink: 0, fontWeight: t.done ? 700 : 400 }}>{t.hours}h</div>
+                        </div>
+                        <div style={{ display: "flex", gap: "6px", marginTop: "3px", flexWrap: "wrap", alignItems: "center" }}>
+                          {t.type && <span style={{ fontSize: "10px", color: "#7A8C96", background: "#F5F6F7", padding: "1px 6px", borderRadius: "8px" }}>{t.type}</span>}
+                          {t.notes && <span style={{ fontSize: "10px", color: "#B0BAC0", fontStyle: "italic" }}>{t.notes}</span>}
+                          {t.done && t.completedAt && <span style={{ fontSize: "10px", color: "#2E7D52", fontWeight: 600 }}>✓ {t.completedAt}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {unassigned.length > 0 && (
+        <div style={{ marginTop: "16px", background: "#FFF8F0", border: "1px solid #F0D9C0", borderRadius: "6px", padding: "12px 16px" }}>
+          <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#C08050", fontWeight: 700, marginBottom: "8px" }}>UNASSIGNED</div>
+          {unassigned.map((t) => (
+            <div key={t.id} style={{ fontSize: "13px", color: "#7A5A40", padding: "4px 0", borderBottom: "1px solid #F0E0D0" }}>{t.title}</div>
+          ))}
+        </div>
+      )}
+      <div style={{ marginTop: "16px", background: "#1C2B3A", borderRadius: "6px", padding: "14px 20px", display: "grid", gridTemplateColumns: "repeat(4, 1fr) 1px repeat(2, 1fr)", gap: "12px", alignItems: "center" }}>
+        {QUADRANTS.map((q) => {
+          const qtasks = quadrantTasks(q.id);
+          const count = qtasks.length;
+          const doneCount = qtasks.filter((t) => t.done).length;
+          const hrs = qtasks.reduce((s, t) => s + t.hours, 0);
+          return (
+            <div key={q.id} style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "9px", letterSpacing: "1.5px", color: "#7A8C96", fontWeight: 600 }}>{q.label}</div>
+              <div style={{ fontSize: "18px", fontWeight: 700, color: "#F0F4F7", marginTop: "2px" }}>
+                {doneCount > 0 ? <><span style={{ color: "#2E7D52" }}>{doneCount}</span><span style={{ color: "#3D5A73" }}>/{count}</span></> : count}
+              </div>
+              <div style={{ fontSize: "10px", color: "#3D5A73" }}>{hrs > 0 ? `${hrs}h` : "--"}</div>
+            </div>
+          );
+        })}
+        <div style={{ background: "#2A3A4A", width: "1px", height: "40px", margin: "0 auto" }} />
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "9px", letterSpacing: "1.5px", color: "#7A8C96", fontWeight: 600 }}>COMPLETED</div>
+          <div style={{ fontSize: "18px", fontWeight: 700, color: "#2E7D52", marginTop: "2px" }}>{hoursCompleted.toFixed(1)}h</div>
+          <div style={{ fontSize: "10px", color: "#3D5A73" }}>{completedTasks.length} tasks</div>
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "9px", letterSpacing: "1.5px", color: "#7A8C96", fontWeight: 600 }}>PROGRESS</div>
+          <div style={{ fontSize: "18px", fontWeight: 700, color: completionPct === 100 ? "#2E7D52" : "#F0F4F7", marginTop: "2px" }}>{completionPct}%</div>
+          <div style={{ fontSize: "10px", color: "#3D5A73" }}>{totalHours.toFixed(1)}h total</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const labelStyle = { display: "block", fontSize: "10px", letterSpacing: "1.5px", color: "#7A8C96", fontWeight: 600, marginBottom: "6px" };
+const inputStyle = { width: "100%", padding: "8px 10px", border: "1px solid #E4E8EB", borderRadius: "4px", fontSize: "13px", color: "#1C2B3A", background: "#FAFAFA", outline: "none", boxSizing: "border-box" };
