@@ -1,2 +1,2 @@
 # Milalola.xyz
-Brainbank
+Milalola's Brainbank
