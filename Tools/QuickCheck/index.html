@@ -5,299 +5,424 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DD Screening Report</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; padding: 2rem 1rem; }
-  .wrap { max-width: 780px; margin: 0 auto; }
-  .top { margin-bottom: 1.25rem; }
-  .top h1 { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
-  .top p { font-size: 13px; color: #666; }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.25rem; }
-  .sc { background: #eeecea; border-radius: 8px; padding: 0.75rem 1rem; }
-  .sl { font-size: 12px; color: #888; margin-bottom: 3px; }
-  .sv { font-size: 22px; font-weight: 500; color: #1a1a1a; }
-  .sv.r { color: #791F1F; }
-  .sv.a { color: #633806; }
-  .sv.g { color: #27500A; }
-  .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
-  .fb { padding: 4px 12px; font-size: 12px; border-radius: 20px; border: 1px solid #ccc; background: transparent; color: #888; cursor: pointer; transition: all 0.15s; }
-  .fb:hover { background: #eeecea; color: #1a1a1a; }
-  .fb.on { background: #eeecea; color: #1a1a1a; border-color: #999; }
-  .dl-btn { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; font-size: 12px; border-radius: 8px; border: 1px solid #ccc; background: #fff; color: #1a1a1a; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
-  .dl-btn:hover { background: #eeecea; }
-  .dl-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
-  .leg { display: flex; gap: 14px; font-size: 11px; color: #888; margin-bottom: 1rem; flex-wrap: wrap; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 4px; vertical-align: middle; }
-  .cards { display: flex; flex-direction: column; gap: 8px; }
-  .card { background: #fff; border: 1px solid #e0deda; border-radius: 12px; border-left: 3px solid transparent; overflow: hidden; }
-  .card.H { border-left-color: #E24B4A; }
-  .card.M { border-left-color: #EF9F27; }
-  .card.L { border-left-color: #639922; }
-  .ch { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 0.875rem 1.125rem; cursor: pointer; user-select: none; }
-  .ch:hover { background: #fafaf9; }
-  .cn { font-size: 14px; font-weight: 500; color: #1a1a1a; }
-  .ct { font-size: 11px; color: #888; margin-top: 2px; }
-  .bx { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; flex-shrink: 0; }
-  .bx.H { background: #FCEBEB; color: #791F1F; }
-  .bx.M { background: #FAEEDA; color: #633806; }
-  .bx.L { background: #EAF3DE; color: #27500A; }
-  .body { padding: 0 1.125rem 0.875rem; border-top: 1px solid #eeecea; display: none; }
-  .body.open { display: block; padding-top: 0.75rem; }
-  .row { display: flex; gap: 10px; font-size: 12px; line-height: 1.55; margin-bottom: 5px; }
-  .lbl { font-size: 11px; color: #888; min-width: 100px; flex-shrink: 0; padding-top: 1px; }
-  .val { color: #1a1a1a; }
-  .chevron { font-size: 11px; color: #aaa; margin-left: 6px; transition: transform 0.2s; display: inline-block; }
-  .chevron.open { transform: rotate(180deg); }
-  @media (max-width: 520px) {
-    .stats { grid-template-columns: repeat(2, 1fr); }
-    .dl-btn { width: 100%; justify-content: center; margin-left: 0; }
-  }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #faf9f7; color: #1a1714; min-height: 100vh; padding: 1.25rem 1rem 3rem; }
+.app { max-width: 780px; margin: 0 auto; }
+h2 { font-size: 19px; font-weight: 700; color: #1a1714; margin-bottom: 3px; }
+.subtitle { font-size: 12.5px; color: #6b6560; }
+.panel { background: #f5f3f0; border: 1px solid #d8d4cf; border-radius: 12px; padding: 1rem 1.125rem; margin-bottom: 1.375rem; }
+.tab-group { display: flex; gap: 3px; padding: 3px; background: #e8e4df; border-radius: 8px; width: fit-content; margin-bottom: 0.8rem; }
+.tab-btn { padding: 5px 14px; font-size: 12px; border-radius: 6px; cursor: pointer; border: none; background: transparent; color: #6b6560; font-weight: 400; transition: all 0.15s; }
+.tab-btn.active { background: #fff; color: #1a1714; font-weight: 600; box-shadow: 0 0 0 1px #d0cbc5; }
+.panel-desc { font-size: 12px; color: #5a5550; margin-bottom: 0.6rem; line-height: 1.55; }
+.search-placeholder { display: flex; align-items: center; gap: 10px; padding: 0.6rem 0.875rem; background: #fff; border: 1px solid #c8c4bf; border-radius: 8px; cursor: text; color: #9a9590; font-size: 13px; }
+.search-placeholder svg { flex-shrink: 0; }
+textarea { width: 100%; height: 170px; padding: 0.7rem 0.875rem; font-size: 12.5px; border-radius: 8px; border: 1.5px solid #3a3530; background: #fff; color: #1a1714; resize: vertical; outline: none; line-height: 1.65; }
+.textarea-mono { font-family: monospace; }
+.error-msg { font-size: 12px; color: #8B1A1A; margin-top: 6px; font-weight: 500; }
+.btn-row { display: flex; gap: 8px; margin-top: 0.75rem; align-items: center; }
+.btn-primary { padding: 8px 20px; font-size: 13px; border-radius: 8px; border: none; background: #2a2520; color: #fff; cursor: pointer; font-weight: 600; }
+.btn-primary:disabled { opacity: 0.7; cursor: wait; }
+.btn-cancel { padding: 8px 14px; font-size: 12.5px; border-radius: 8px; border: 1px solid #c8c4bf; background: transparent; color: #4a4540; cursor: pointer; }
+.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 1.125rem; }
+.stat-card { background: #f5f3f0; border: 1px solid #dedad6; border-radius: 9px; padding: 0.7rem 0.9rem; }
+.stat-label { font-size: 11.5px; color: #6b6560; margin-bottom: 3px; font-weight: 500; }
+.stat-value { font-size: 24px; font-weight: 700; }
+.toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 0.875rem; flex-wrap: wrap; }
+.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-btn { padding: 5px 14px; font-size: 12px; border-radius: 20px; cursor: pointer; border: 1px solid #d8d4cf; background: #fff; color: #4a4540; font-weight: 400; transition: all 0.15s; }
+.filter-btn.active { border-color: #8a8078; background: #3a3530; color: #fff; font-weight: 600; }
+.action-group { margin-left: auto; display: flex; gap: 7px; }
+.btn-export { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; font-size: 12px; border-radius: 8px; border: 1px solid #c8c4bf; background: #fff; color: #2a2520; cursor: pointer; font-weight: 500; }
+.btn-clear { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; font-size: 12px; border-radius: 8px; border: 1px solid #e8b4b4; background: #fdf0f0; color: #7A1F1F; cursor: pointer; font-weight: 500; }
+.legend { display: flex; gap: 16px; font-size: 11.5px; color: #6b6560; margin-bottom: 0.875rem; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.cards { display: flex; flex-direction: column; gap: 7px; }
+.card { background: #fff; border: 1px solid #d8d4cf; border-radius: 10px; border-left-width: 4px; overflow: hidden; }
+.card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0.8rem 1rem; cursor: pointer; user-select: none; }
+.card-name { font-size: 13.5px; font-weight: 600; color: #1a1714; }
+.card-type { font-size: 11.5px; color: #6b6560; margin-top: 2px; }
+.badge { display: inline-flex; align-items: center; padding: 3px 11px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; border: 1px solid; }
+.chevron { font-size: 10px; color: #999; display: inline-block; transition: transform 0.18s; }
+.chevron.open { transform: rotate(180deg); }
+.card-body { padding: 0.75rem 1rem 0.9rem; border-top: 1px solid #ece9e5; background: #faf9f8; display: none; }
+.card-body.open { display: block; }
+.finding-row { display: flex; gap: 12px; font-size: 12.5px; line-height: 1.65; margin-bottom: 7px; }
+.finding-label { font-size: 10.5px; font-weight: 700; color: #555; min-width: 150px; flex-shrink: 0; padding-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+.finding-label.flag { color: #7A4500; }
+.finding-label.flag::before { content: "⚑ "; }
+.finding-value { color: #222; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: #6b6560; }
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-title { font-size: 15px; font-weight: 600; color: #2a2520; margin-bottom: 6px; }
+.empty-sub { font-size: 13px; }
+.hidden { display: none; }
+@media (max-width: 520px) {
+  .stats { grid-template-columns: repeat(2,1fr); }
+  .action-group { margin-left: 0; }
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="top">
-    <h1>DD screening report — 27 entities</h1>
-    <p>First-pass PEP · sanctions · adverse media · entity flags &nbsp;·&nbsp; Knowledge base as of June 2026 &nbsp;·&nbsp; For first-look use; manual verification required</p>
+<div class="app">
+
+  <!-- Header -->
+  <div style="margin-bottom:1.125rem">
+    <h2>DD Screening Report</h2>
+    <p class="subtitle">PEP · sanctions · adverse media · registry · affiliates · remote connections &nbsp;·&nbsp; Manual verification required</p>
   </div>
 
-  <div class="stats">
-    <div class="sc"><div class="sl">Total entities</div><div class="sv">27</div></div>
-    <div class="sc"><div class="sl">High risk</div><div class="sv r" id="hc">0</div></div>
-    <div class="sc"><div class="sl">Review flagged</div><div class="sv a" id="mc">0</div></div>
-    <div class="sc"><div class="sl">Clear</div><div class="sv g" id="lc">0</div></div>
-  </div>
-
-  <div class="toolbar">
-    <div class="filters">
-      <button class="fb on" onclick="filter('all',this)">All 27</button>
-      <button class="fb" onclick="filter('H',this)">High risk</button>
-      <button class="fb" onclick="filter('M',this)">Review</button>
-      <button class="fb" onclick="filter('L',this)">Clear</button>
+  <!-- Search panel -->
+  <div class="panel">
+    <div class="tab-group">
+      <button class="tab-btn active" id="tab-ai" onclick="setMode('ai')">AI screening</button>
+      <button class="tab-btn" id="tab-paste" onclick="setMode('paste')">Paste research list</button>
     </div>
-    <button class="dl-btn" onclick="downloadCSV()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>
-      Download review list (CSV)
-    </button>
+    <p class="panel-desc" id="panel-desc">
+      Enter entity names (one per line or comma-separated) — Claude will screen for PEP, sanctions, adverse media, company registry data, affiliate ownership chains, and remote risk connections.
+    </p>
+
+    <div id="search-idle">
+      <div class="search-placeholder" onclick="expandSearch()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9a9590" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span id="placeholder-text">Type or paste entity names…</span>
+      </div>
+    </div>
+
+    <div id="search-expanded" class="hidden">
+      <textarea id="search-input" placeholder="Acme Capital LLC&#10;John Smith&#10;Rocket Internet GmbH & Co. KG&#10;..."></textarea>
+      <div class="error-msg hidden" id="error-msg"></div>
+      <div class="btn-row">
+        <button class="btn-primary" id="run-btn" onclick="runScreening()">Run screening</button>
+        <button class="btn-cancel" onclick="collapseSearch()">Cancel</button>
+      </div>
+    </div>
   </div>
 
-  <div class="leg">
-    <span><span class="dot" style="background:#E24B4A"></span>High risk — confirmed concern</span>
-    <span><span class="dot" style="background:#EF9F27"></span>Review — flag for manual check</span>
-    <span><span class="dot" style="background:#639922"></span>Clear — no adverse findings</span>
+  <!-- Data area -->
+  <div id="data-area">
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">No entities screened yet</div>
+      <div class="empty-sub">Use the panel above to screen entities or import a research list.</div>
+    </div>
   </div>
 
-  <div class="cards" id="cards"></div>
 </div>
 
 <script>
-var DATA = [
-  { name:"FF Pathfinder VII, LLC", type:"Fund / LLC", risk:"M",
-    pep:"No PEP identified in public sources; GP identity not publicly disclosed.",
-    sanctions:"No sanctions list match found.",
-    media:"No adverse media located; entity is not publicly profiled.",
-    notes:"Private fund with limited public footprint; recommend UBO identification and GP disclosure as part of manual KYC." },
-  { name:"10x Founders Fund GmbH & Co. KG", type:"Fund / German LP", risk:"L",
-    pep:"No PEP identified; a recognised German venture fund.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found; known VC vehicle operating in Germany.",
-    notes:"German LP structure subject to standard BaFin-regulated AML regime; GFC-affiliated fund." },
-  { name:"dao5 capital fund L.P.", type:"Fund / LP", risk:"M",
-    pep:"No PEP identified in public sources.",
-    sanctions:"No sanctions match found.",
-    media:"No significant adverse media; operates in the crypto/web3 investment space.",
-    notes:"Crypto-focused fund with limited public disclosure; DAOs and web3 sector carry elevated ML typology risk — recommend UBO verification." },
-  { name:"Andrej-Nicolai Henkler", type:"Individual", risk:"M",
-    pep:"No PEP match found in public records; limited public profile.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media located.",
-    notes:"Individual with minimal public footprint; insufficient public information to clear — standard enhanced due diligence on source of wealth recommended." },
-  { name:"Coinbase Global, Inc.", type:"Corporate / Public (NASDAQ: COIN)", risk:"M",
-    pep:"Not applicable — publicly traded company.",
-    sanctions:"No sanctions designation; US-regulated entity.",
-    media:"Subject to SEC enforcement action (2023) alleging unregistered exchange/broker operations; SEC dismissed the action in Feb 2025 without prejudice on the merits.",
-    notes:"NASDAQ-listed; dismissed SEC litigation and crypto-sector regulatory risk warrant noting; not a disqualifying factor for most purposes but requires AML crypto-specific controls." },
-  { name:"Rocket Internet Capital Partners II SCS", type:"Fund / SCS (Luxembourg)", risk:"L",
-    pep:"No PEP identified; Samwer brothers are known public figures with no PEP classification.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media specific to this fund vehicle.",
-    notes:"Luxembourg SCS structure linked to Rocket Internet SE (Berlin); standard EU AML supervised jurisdiction; well-known VC brand." },
-  { name:"FJ Labs III, LP", type:"Fund / LP", risk:"L",
-    pep:"No PEP identified; founders Fabrice Grinda and José Marín are public entrepreneurs with clean profiles.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"Established NYC-based marketplace-focused VC (900+ portfolio companies); professionally managed; no red flags identified." },
-  { name:"Blizzard the Avalanche Fund LP", type:"Fund / LP", risk:"M",
-    pep:"No PEP identified in public sources.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found; fund name associated with Avalanche blockchain ecosystem.",
-    notes:"Crypto/blockchain-native fund with limited public disclosure; sector-level ML risk applies — recommend UBO and GP verification." },
-  { name:"Unanimous Capital", type:"Fund / Firm", risk:"M",
-    pep:"No PEP identified in public sources.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"Limited public footprint; entity identity not fully verifiable from open sources alone — manual GP and UBO check recommended." },
-  { name:"Cassandra Capital GmbH", type:"Corporate / GmbH (Germany)", risk:"M",
-    pep:"No PEP identified in public sources.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"Private German GmbH with very limited public profile; recommend commercial registry verification (Handelsregister) and UBO disclosure." },
-  { name:"Martial Eagle Fund LP", type:"Fund / LP", risk:"M",
-    pep:"No PEP identified in public sources.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"Opaque fund name with no significant public profile; recommend GP and UBO identification as standard enhanced due diligence." },
-  { name:"BL Fund I (New Layer Capital AL Syndicate, LP)", type:"Fund / LP Syndicate", risk:"M",
-    pep:"No PEP identified in public sources.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found; crypto/blockchain-linked based on name.",
-    notes:"Syndicate LP with crypto/blockchain association and limited public disclosure; standard enhanced review of GP, UBO, and syndicate participants recommended." },
-  { name:"Global Founders Capital GmbH & Co. KG Nr. 1", type:"Fund / German LP", risk:"L",
-    pep:"No PEP identified; linked to Samwer / Rocket Internet ecosystem.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"GFC is a well-known Berlin-based VC; German LP structure under standard BaFin AML regime." },
-  { name:"Newport Investments GmbH", type:"Corporate / GmbH (Germany)", risk:"M",
-    pep:"No PEP identified in public sources.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"Private German GmbH with limited public profile; recommend Handelsregister check and UBO disclosure as standard practice." },
-  { name:"Rocket Internet Capital Partners (Euro) II SCS", type:"Fund / SCS (Luxembourg)", risk:"L",
-    pep:"No PEP identified; Rocket Internet management publicly known, no PEP classification.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media specific to this vehicle.",
-    notes:"Luxembourg SCS fund vehicle in the Rocket Internet family; EU-regulated jurisdiction; no red flags identified." },
-  { name:"FJ Labs LP", type:"Fund / LP", risk:"L",
-    pep:"No PEP identified.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"Core FJ Labs vehicle; Grinda/Marín-managed; established fund with strong public profile and clean history." },
-  { name:"Product Forward Ventures Limited", type:"Corporate / Limited", risk:"M",
-    pep:"No PEP identified in public sources.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"Limited company with minimal public footprint; corporate registry verification and UBO disclosure recommended." },
-  { name:"Ben Davenport", type:"Individual", risk:"L",
-    pep:"No PEP identified; prominent US tech entrepreneur and investor.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found; co-founded Beluga (acq. by Facebook → Messenger) and BitGo; Venture Partner at Blockchain Capital.",
-    notes:"Well-documented public profile in US tech/crypto; no red flags; crypto-sector background warrants standard AML controls." },
-  { name:"FJ Labs Entrepreneurs Fund 2022", type:"Fund / LP", risk:"L",
-    pep:"No PEP identified.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"FJ Labs-managed vehicle; same clean profile as parent fund; no red flags identified." },
-  { name:"Darian Shirazi", type:"Individual", risk:"L",
-    pep:"No PEP identified; Iranian-American entrepreneur, no government affiliation.",
-    sanctions:"No sanctions match found; Iranian heritage noted — OFAC name-screen recommended as standard practice.",
-    media:"No adverse media found; Forbes 30 Under 30 (2013); founded Radius (acq. by Kabbage/AmEx); General Partner at Gradient Ventures (Google AI fund).",
-    notes:"Well-documented clean profile; Iranian-American background warrants routine OFAC name-screen as a matter of standard process." },
-  { name:"WAX VENTURE UG", type:"Corporate / UG (Germany)", risk:"M",
-    pep:"No PEP identified in public sources.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"Small German UG (Unternehmergesellschaft) with no public profile; recommend Handelsregister check and UBO disclosure." },
-  { name:"Jingyang Fang", type:"Individual", risk:"M",
-    pep:"No PEP match found; name is not rare — disambiguation required.",
-    sanctions:"No sanctions match found in open sources; Chinese national name warrants cross-check against OFAC/SDN and EU lists.",
-    media:"No adverse media found in English-language sources; limited public profile.",
-    notes:"Individual with minimal English-language public footprint; recommend full KYC, source of wealth, and cross-check against OFAC, EU, UN, and Chinese national sanctions lists." },
-  { name:"Marc Bhargava", type:"Individual", risk:"L",
-    pep:"No PEP identified; US private-sector VC.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found; co-founded Tagomi (crypto prime brokerage, acq. by Coinbase 2020); Managing Director at General Catalyst.",
-    notes:"Well-documented public profile; crypto-adjacent background warrants standard AML controls." },
-  { name:"Prescience Ventures, LLC", type:"Fund / LLC", risk:"M",
-    pep:"No PEP identified in public sources.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found.",
-    notes:"Private LLC fund with limited public profile; recommend GP identification and UBO disclosure." },
-  { name:"Anastasia Andrianova", type:"Individual", risk:"M",
-    pep:"No PEP identified; Oxford-educated finance professional based in London.",
-    sanctions:"No sanctions match found; Russian name noted — standard OFAC/EU sanctions name-screen recommended.",
-    media:"Associated with Akropolis DeFi protocol which suffered a $2M flash-loan exploit in November 2020; attributed to a smart-contract vulnerability, not misconduct by Andrianova personally.",
-    notes:"Founder of Akropolis (DeFi); 2020 protocol security incident — not a personal adverse finding but warrants disclosure. Russian heritage warrants routine OFAC/EU name-screen given current sanctions environment." },
-  { name:"Scott Nolan", type:"Individual", risk:"L",
-    pep:"No PEP identified; early SpaceX employee and Founders Fund partner.",
-    sanctions:"No sanctions match found.",
-    media:"No adverse media found; Partner at Founders Fund since 2011; ex-SpaceX propulsion engineer.",
-    notes:"Well-documented clean profile; no red flags identified." },
-  { name:"Amin Mirzadegan", type:"Individual", risk:"L",
-    pep:"No PEP identified; no government affiliation.",
-    sanctions:"No sanctions match found; Iranian-origin surname — routine OFAC name-screen recommended as standard practice.",
-    media:"No adverse media found; Partner at Founders Fund; previously at General Atlantic; Yale-educated.",
-    notes:"Clean public profile; Iranian-origin surname warrants routine OFAC name-screen; no substantive concerns identified." }
+// ─── State ────────────────────────────────────────────────────────────────────
+var STORAGE_KEY = "dd_screening_entities_v3";
+var currentMode = "ai";
+var allData = [];
+var currentFilter = "all";
+var openCards = {};
+
+var SECTION_DEFS = [
+  { key:"pep",        label:"PEP check",              flag:false },
+  { key:"sanctions",  label:"Sanctions",              flag:false },
+  { key:"media",      label:"Adverse media",          flag:false },
+  { key:"registry",   label:"Registry data",          flag:false },
+  { key:"affiliates", label:"Affiliates & ownership", flag:true  },
+  { key:"remote",     label:"Remote connections",     flag:true  },
+  { key:"notes",      label:"Analyst notes",          flag:false },
 ];
 
-var cur = 'all';
-var openStates = {};
+var RISK_CONFIG = {
+  H: { label:"⚑ High risk", badgeBg:"#FCEBEB", badgeColor:"#7A1F1F", borderColor:"#D94040" },
+  M: { label:"⚑ Review",    badgeBg:"#FEF3E2", badgeColor:"#7A4500", borderColor:"#E8930A" },
+  L: { label:"✓ Clear",     badgeBg:"#EAF4DC", badgeColor:"#2A5A08", borderColor:"#5A9E1A" },
+};
+
+var SYSTEM_AI = `You are a KYC/AML due diligence analyst with access to public corporate registries, regulatory databases, and open-source intelligence. Given a list of entity names, return a JSON array (no markdown, no preamble, no code fences) where each object has exactly these keys:
+
+- name (string)
+- type (string: e.g. "Individual", "Fund / LP", "Corporate / GmbH (Germany)", "Fund / SCS (Luxembourg)", etc.)
+- risk ("H", "M", or "L")
+- pep (string: PEP screening result — named individuals connected to government, state-owned enterprises, or international organisations)
+- sanctions (string: OFAC/SDN, EU, UN, UK HMT sanctions screening result)
+- media (string: adverse media — regulatory actions, litigation, enforcement, fraud allegations)
+- registry (string: company registry information — jurisdiction, registration number if known, registered address if known, incorporation date if known, legal status, regulated/supervised status. If individual, write "N/A".)
+- affiliates (string: known ownership structure, parent entities, subsidiaries, UBOs, GP/LP relationships, fund managers, managing directors, board members, key shareholders — as deep as publicly known)
+- remote (string: two-hop or indirect risk connections — e.g. affiliated with an entity that is sanctioned or PEP-linked, co-investor with flagged parties, managed by a firm with adverse history. Write "None identified." if clean.)
+- notes (string: analyst notes, recommended due diligence steps, open questions)
+
+Risk logic:
+- H = confirmed adverse finding (sanctions hit, PEP confirmed, serious adverse media, or direct connection to sanctioned/PEP entity)
+- M = elevated risk requiring manual review (crypto-sector, opaque structure, limited public profile, remote risk connection, name-screen needed)
+- L = clean and well-documented with no risk connections identified
+
+Be thorough on affiliates and remote connections — this is the most important section for compliance purposes.
+Return ONLY the raw JSON array.`;
+
+var SYSTEM_PASTE = `You are a KYC/AML data parser and compliance analyst. The user will paste pre-compiled research notes about entities in plain text.
+
+Extract each entity and return a JSON array (no markdown, no preamble, no code fences) where each object has exactly these keys:
+- name, type, risk ("H"/"M"/"L"), pep, sanctions, media, registry, affiliates, remote, notes
+
+Definitions:
+- registry: company registration details — jurisdiction, reg. number, address, incorporation date, legal status, regulated status. "N/A" for individuals.
+- affiliates: ownership structure, parent entities, subsidiaries, UBOs, GP/LP relationships, fund managers, board members, key shareholders.
+- remote: two-hop/indirect risk connections — affiliations with sanctioned or PEP-linked entities, co-investors with flagged parties. "None identified." if clean.
+
+Risk: H = confirmed adverse finding or direct connection; M = elevated risk or limited info; L = explicitly clean.
+Parse faithfully — do not invent data not in the text. If a field is not mentioned, write "Not provided." Return ONLY the raw JSON array.`;
+
+// ─── Storage helpers ──────────────────────────────────────────────────────────
+function storageGet(key) {
+  try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; }
+}
+function storageSet(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+function storageDel(key) {
+  try { localStorage.removeItem(key); } catch {}
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+(function init() {
+  var saved = storageGet(STORAGE_KEY);
+  if (saved && Array.isArray(saved) && saved.length) {
+    allData = saved;
+    renderDataArea();
+  }
+})();
+
+// ─── Mode switching ───────────────────────────────────────────────────────────
+function setMode(m) {
+  currentMode = m;
+  document.getElementById("tab-ai").classList.toggle("active", m === "ai");
+  document.getElementById("tab-paste").classList.toggle("active", m === "paste");
+  document.getElementById("panel-desc").textContent = m === "ai"
+    ? "Enter entity names (one per line or comma-separated) — Claude will screen for PEP, sanctions, adverse media, company registry data, affiliate ownership chains, and remote risk connections."
+    : "Paste your pre-compiled research notes in any plain text format — Claude will extract all available fields including registry data, affiliates, and indirect connections.";
+  document.getElementById("placeholder-text").textContent = m === "ai" ? "Type or paste entity names…" : "Paste research notes here…";
+  var ta = document.getElementById("search-input");
+  ta.placeholder = m === "ai" ? "Acme Capital LLC\nJohn Smith\nRocket Internet GmbH & Co. KG\n..." : "FF Pathfinder VII, LLC — Fund / LLC\nRisk: Medium\nPEP: No PEP identified...\nRegistry: Delaware LLC, reg. no. 12345...\nAffiliates: GP is Pathfinder Advisors Inc., UBO unknown...\n...";
+  ta.style.fontFamily = m === "paste" ? "monospace" : "inherit";
+  document.getElementById("run-btn").textContent = m === "ai" ? "Run screening" : "Import list";
+}
+
+// ─── Search expand/collapse ───────────────────────────────────────────────────
+function expandSearch() {
+  document.getElementById("search-idle").classList.add("hidden");
+  document.getElementById("search-expanded").classList.remove("hidden");
+  document.getElementById("search-input").focus();
+}
+function collapseSearch() {
+  document.getElementById("search-expanded").classList.add("hidden");
+  document.getElementById("search-idle").classList.remove("hidden");
+  document.getElementById("search-input").value = "";
+  hideError();
+}
+
+function showError(msg) {
+  var el = document.getElementById("error-msg");
+  el.textContent = msg;
+  el.classList.remove("hidden");
+}
+function hideError() {
+  document.getElementById("error-msg").classList.add("hidden");
+}
+
+// ─── Screening ────────────────────────────────────────────────────────────────
+async function runScreening() {
+  var input = document.getElementById("search-input").value.trim();
+  if (!input) { showError("Please enter at least one entity or paste your research notes."); return; }
+  var btn = document.getElementById("run-btn");
+  btn.disabled = true;
+  btn.textContent = currentMode === "ai" ? "Screening…" : "Parsing…";
+  hideError();
+
+  try {
+    var res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 6000,
+        system: currentMode === "ai" ? SYSTEM_AI : SYSTEM_PASTE,
+        messages: [{ role: "user", content: currentMode === "ai" ? "Screen the following entities:\n\n" + input : input }]
+      })
+    });
+    var json = await res.json();
+    var raw = "";
+    if (json.content && Array.isArray(json.content)) {
+      for (var i = 0; i < json.content.length; i++) {
+        if (json.content[i].type === "text") { raw = json.content[i].text; break; }
+      }
+    }
+    raw = raw.replace(/```json|```/g, "").trim();
+    var parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed) || !parsed[0] || !parsed[0].name) throw new Error("Bad format");
+    allData = parsed;
+    storageSet(STORAGE_KEY, allData);
+    openCards = {};
+    currentFilter = "all";
+    collapseSearch();
+    renderDataArea();
+  } catch(e) {
+    showError(currentMode === "ai"
+      ? "Screening failed. Check your input and try again."
+      : "Could not parse the pasted text. Try cleaning up the format and retry.");
+    console.error(e);
+  }
+  btn.disabled = false;
+  btn.textContent = currentMode === "ai" ? "Run screening" : "Import list";
+}
+
+// ─── Clear ────────────────────────────────────────────────────────────────────
+function clearData() {
+  allData = []; currentFilter = "all"; openCards = {};
+  storageDel(STORAGE_KEY);
+  renderDataArea();
+}
+
+// ─── CSV export ───────────────────────────────────────────────────────────────
+function escCsv(s) { return '"' + String(s || "").replace(/"/g, '""') + '"'; }
+function downloadCSV() {
+  var flagged = allData.filter(function(d){ return d.risk === "H" || d.risk === "M"; });
+  var riskLabel = function(r){ return r==="H"?"High":r==="M"?"Medium":"Low"; };
+  var header = ["Entity name","Entity type","Risk rating","PEP check","Sanctions","Adverse media","Registry data","Affiliates & ownership","Remote connections","Analyst notes"];
+  var rows = flagged.map(function(d){
+    return [d.name,d.type,riskLabel(d.risk),d.pep,d.sanctions,d.media,d.registry,d.affiliates,d.remote,d.notes].map(escCsv).join(",");
+  });
+  var csv = [header.map(escCsv).join(",")].concat(rows).join("\r\n");
+  var blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a"); a.href = url;
+  a.download = "dd_review_" + new Date().toISOString().slice(0,10) + ".csv";
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// ─── Filter ───────────────────────────────────────────────────────────────────
+function setFilter(f) {
+  currentFilter = f;
+  renderDataArea();
+}
+
+// ─── Card toggle ──────────────────────────────────────────────────────────────
+function toggleCard(idx) {
+  openCards[idx] = !openCards[idx];
+  var body = document.getElementById("card-body-" + idx);
+  var chev = document.getElementById("card-chev-" + idx);
+  if (body) body.classList.toggle("open", !!openCards[idx]);
+  if (chev) chev.classList.toggle("open", !!openCards[idx]);
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function renderDataArea() {
+  var container = document.getElementById("data-area");
+  if (!allData.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No entities screened yet</div><div class="empty-sub">Use the panel above to screen entities or import a research list.</div></div>';
+    return;
+  }
+
+  var counts = {
+    H: allData.filter(function(d){ return d.risk==="H"; }).length,
+    M: allData.filter(function(d){ return d.risk==="M"; }).length,
+    L: allData.filter(function(d){ return d.risk==="L"; }).length,
+  };
+
+  var visible = currentFilter === "all" ? allData : allData.filter(function(d){ return d.risk===currentFilter; });
+
+  var html = "";
+
+  // Stats
+  html += '<div class="stats">';
+  html += statCard("Total",     allData.length, "#1a1714");
+  html += statCard("High risk", counts.H,       "#7A1F1F");
+  html += statCard("Review",    counts.M,       "#7A4500");
+  html += statCard("Clear",     counts.L,       "#2A5A08");
+  html += '</div>';
+
+  // Toolbar
+  html += '<div class="toolbar"><div class="filter-group">';
+  html += filterBtn("all", "All " + allData.length);
+  html += filterBtn("H",   "High (" + counts.H + ")");
+  html += filterBtn("M",   "Review (" + counts.M + ")");
+  html += filterBtn("L",   "Clear (" + counts.L + ")");
+  html += '</div><div class="action-group">';
+  html += '<button class="btn-export" onclick="downloadCSV()">' +
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>Export CSV</button>';
+  html += '<button class="btn-clear" onclick="clearData()">' +
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>Clear search</button>';
+  html += '</div></div>';
+
+  // Legend
+  html += '<div class="legend">';
+  html += legendItem("#D94040","High risk — confirmed concern");
+  html += legendItem("#E8930A","Review — manual check required");
+  html += legendItem("#5A9E1A","Clear — no adverse findings");
+  html += '</div>';
+
+  // Cards
+  html += '<div class="cards">';
+  if (!visible.length) {
+    html += '<div style="font-size:13px;color:#6b6560;padding:0.75rem 0">No entities match this filter.</div>';
+  } else {
+    visible.forEach(function(d) {
+      var idx = allData.indexOf(d);
+      html += buildCard(d, idx);
+    });
+  }
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+function statCard(label, val, color) {
+  return '<div class="stat-card"><div class="stat-label">' + label + '</div><div class="stat-value" style="color:' + color + '">' + val + '</div></div>';
+}
+
+function filterBtn(key, label) {
+  var active = currentFilter === key ? " active" : "";
+  return '<button class="filter-btn' + active + '" onclick="setFilter(\'' + key + '\')">' + label + '</button>';
+}
+
+function legendItem(color, text) {
+  return '<span class="legend-item"><span class="dot" style="background:' + color + '"></span>' + text + '</span>';
+}
+
+function buildCard(d, idx) {
+  var cfg = RISK_CONFIG[d.risk] || RISK_CONFIG.M;
+  var isOpen = !!openCards[idx];
+
+  var findings = "";
+  SECTION_DEFS.forEach(function(sec) {
+    var val = d[sec.key];
+    if (!val || val === "N/A" || val === "") return;
+    var labelClass = "finding-label" + (sec.flag ? " flag" : "");
+    findings += '<div class="finding-row">' +
+      '<span class="' + labelClass + '">' + esc(sec.label) + '</span>' +
+      '<span class="finding-value">' + esc(val) + '</span>' +
+      '</div>';
+  });
+
+  return '<div class="card" style="border-left-color:' + cfg.borderColor + '">' +
+    '<div class="card-header" onclick="toggleCard(' + idx + ')">' +
+      '<div style="min-width:0">' +
+        '<div class="card-name">' + esc(d.name) + '</div>' +
+        '<div class="card-type">' + esc(d.type || "") + '</div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
+        '<span class="badge" style="background:' + cfg.badgeBg + ';color:' + cfg.badgeColor + ';border-color:' + cfg.borderColor + '">' + cfg.label + '</span>' +
+        '<span class="chevron' + (isOpen?" open":"") + '" id="card-chev-' + idx + '">▼</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="card-body' + (isOpen?" open":"") + '" id="card-body-' + idx + '">' + findings + '</div>' +
+  '</div>';
+}
 
 function esc(s) {
-  return '"' + String(s || '').replace(/"/g, '""') + '"';
+  return String(s || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
 }
-
-function downloadCSV() {
-  var flagged = DATA.filter(function(d) { return d.risk === 'H' || d.risk === 'M'; });
-  var riskLabel = function(r) { return r === 'H' ? 'High' : r === 'M' ? 'Medium' : 'Low'; };
-  var header = ['Entity name','Entity type','Risk rating','PEP check','Sanctions','Adverse media','Notes'];
-  var rows = flagged.map(function(d) {
-    return [esc(d.name), esc(d.type), esc(riskLabel(d.risk)), esc(d.pep), esc(d.sanctions), esc(d.media), esc(d.notes)].join(',');
-  });
-  var csv = [header.map(function(h){ return esc(h); }).join(',')].concat(rows).join('\r\n');
-  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  var today = new Date().toISOString().slice(0,10);
-  a.download = 'dd_review_list_' + today + '.csv';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-
-function toggle(i) {
-  openStates[i] = !openStates[i];
-  var body = document.getElementById('b' + i);
-  var chev = document.getElementById('chev' + i);
-  if (body) body.className = 'body' + (openStates[i] ? ' open' : '');
-  if (chev) chev.className = 'chevron' + (openStates[i] ? ' open' : '');
-}
-
-function filter(r, el) {
-  cur = r;
-  document.querySelectorAll('.fb').forEach(function(b) { b.classList.remove('on'); });
-  el.classList.add('on');
-  render();
-}
-
-function render() {
-  var show = cur === 'all' ? DATA : DATA.filter(function(d) { return d.risk === cur; });
-  var html = show.map(function(d) {
-    var ri = DATA.indexOf(d);
-    var label = d.risk === 'H' ? '&#9873; High risk' : d.risk === 'M' ? '&#9873; Review' : '&#10003; Clear';
-    var isOpen = !!openStates[ri];
-    return '<div class="card ' + d.risk + '">'
-      + '<div class="ch" onclick="toggle(' + ri + ')">'
-      + '<div><div class="cn">' + d.name + '</div><div class="ct">' + d.type + '</div></div>'
-      + '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'
-      + '<span class="bx ' + d.risk + '">' + label + '</span>'
-      + '<span class="chevron' + (isOpen ? ' open' : '') + '" id="chev' + ri + '">&#9660;</span>'
-      + '</div></div>'
-      + '<div class="body' + (isOpen ? ' open' : '') + '" id="b' + ri + '">'
-      + '<div class="row"><span class="lbl">PEP check</span><span class="val">' + d.pep + '</span></div>'
-      + '<div class="row"><span class="lbl">Sanctions</span><span class="val">' + d.sanctions + '</span></div>'
-      + '<div class="row"><span class="lbl">Adverse media</span><span class="val">' + d.media + '</span></div>'
-      + '<div class="row"><span class="lbl">Notes</span><span class="val">' + d.notes + '</span></div>'
-      + '</div></div>';
-  }).join('');
-  document.getElementById('cards').innerHTML = html;
-  document.getElementById('hc').textContent = DATA.filter(function(d){ return d.risk==='H'; }).length;
-  document.getElementById('mc').textContent = DATA.filter(function(d){ return d.risk==='M'; }).length;
-  document.getElementById('lc').textContent = DATA.filter(function(d){ return d.risk==='L'; }).length;
-}
-
-render();
 </script>
 </body>
 </html>
