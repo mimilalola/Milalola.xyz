@@ -1,428 +1,275 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DD Screening Report</title>
+<h2 class="sr-only">Due diligence screening report — PEP, sanctions, adverse media, registry and affiliate checks</h2>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, sans-serif; background: #faf9f7; color: #1a1714; min-height: 100vh; padding: 1.25rem 1rem 3rem; }
-.app { max-width: 780px; margin: 0 auto; }
-h2 { font-size: 19px; font-weight: 700; color: #1a1714; margin-bottom: 3px; }
-.subtitle { font-size: 12.5px; color: #6b6560; }
-.panel { background: #f5f3f0; border: 1px solid #d8d4cf; border-radius: 12px; padding: 1rem 1.125rem; margin-bottom: 1.375rem; }
-.tab-group { display: flex; gap: 3px; padding: 3px; background: #e8e4df; border-radius: 8px; width: fit-content; margin-bottom: 0.8rem; }
-.tab-btn { padding: 5px 14px; font-size: 12px; border-radius: 6px; cursor: pointer; border: none; background: transparent; color: #6b6560; font-weight: 400; transition: all 0.15s; }
-.tab-btn.active { background: #fff; color: #1a1714; font-weight: 600; box-shadow: 0 0 0 1px #d0cbc5; }
-.panel-desc { font-size: 12px; color: #5a5550; margin-bottom: 0.6rem; line-height: 1.55; }
-.search-placeholder { display: flex; align-items: center; gap: 10px; padding: 0.6rem 0.875rem; background: #fff; border: 1px solid #c8c4bf; border-radius: 8px; cursor: text; color: #9a9590; font-size: 13px; }
-.search-placeholder svg { flex-shrink: 0; }
-textarea { width: 100%; height: 170px; padding: 0.7rem 0.875rem; font-size: 12.5px; border-radius: 8px; border: 1.5px solid #3a3530; background: #fff; color: #1a1714; resize: vertical; outline: none; line-height: 1.65; }
-.textarea-mono { font-family: monospace; }
-.error-msg { font-size: 12px; color: #8B1A1A; margin-top: 6px; font-weight: 500; }
-.btn-row { display: flex; gap: 8px; margin-top: 0.75rem; align-items: center; }
-.btn-primary { padding: 8px 20px; font-size: 13px; border-radius: 8px; border: none; background: #2a2520; color: #fff; cursor: pointer; font-weight: 600; }
-.btn-primary:disabled { opacity: 0.7; cursor: wait; }
-.btn-cancel { padding: 8px 14px; font-size: 12.5px; border-radius: 8px; border: 1px solid #c8c4bf; background: transparent; color: #4a4540; cursor: pointer; }
-.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 1.125rem; }
-.stat-card { background: #f5f3f0; border: 1px solid #dedad6; border-radius: 9px; padding: 0.7rem 0.9rem; }
-.stat-label { font-size: 11.5px; color: #6b6560; margin-bottom: 3px; font-weight: 500; }
-.stat-value { font-size: 24px; font-weight: 700; }
-.toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 0.875rem; flex-wrap: wrap; }
-.filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
-.filter-btn { padding: 5px 14px; font-size: 12px; border-radius: 20px; cursor: pointer; border: 1px solid #d8d4cf; background: #fff; color: #4a4540; font-weight: 400; transition: all 0.15s; }
-.filter-btn.active { border-color: #8a8078; background: #3a3530; color: #fff; font-weight: 600; }
-.action-group { margin-left: auto; display: flex; gap: 7px; }
-.btn-export { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; font-size: 12px; border-radius: 8px; border: 1px solid #c8c4bf; background: #fff; color: #2a2520; cursor: pointer; font-weight: 500; }
-.btn-clear { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; font-size: 12px; border-radius: 8px; border: 1px solid #e8b4b4; background: #fdf0f0; color: #7A1F1F; cursor: pointer; font-weight: 500; }
-.legend { display: flex; gap: 16px; font-size: 11.5px; color: #6b6560; margin-bottom: 0.875rem; flex-wrap: wrap; }
-.legend-item { display: flex; align-items: center; gap: 5px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-.cards { display: flex; flex-direction: column; gap: 7px; }
-.card { background: #fff; border: 1px solid #d8d4cf; border-radius: 10px; border-left-width: 4px; overflow: hidden; }
-.card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0.8rem 1rem; cursor: pointer; user-select: none; }
-.card-name { font-size: 13.5px; font-weight: 600; color: #1a1714; }
-.card-type { font-size: 11.5px; color: #6b6560; margin-top: 2px; }
-.badge { display: inline-flex; align-items: center; padding: 3px 11px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; border: 1px solid; }
-.chevron { font-size: 10px; color: #999; display: inline-block; transition: transform 0.18s; }
-.chevron.open { transform: rotate(180deg); }
-.card-body { padding: 0.75rem 1rem 0.9rem; border-top: 1px solid #ece9e5; background: #faf9f8; display: none; }
-.card-body.open { display: block; }
-.finding-row { display: flex; gap: 12px; font-size: 12.5px; line-height: 1.65; margin-bottom: 7px; }
-.finding-label { font-size: 10.5px; font-weight: 700; color: #555; min-width: 150px; flex-shrink: 0; padding-top: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
-.finding-label.flag { color: #7A4500; }
-.finding-label.flag::before { content: "⚑ "; }
-.finding-value { color: #222; }
-.empty-state { text-align: center; padding: 3rem 1rem; color: #6b6560; }
-.empty-icon { font-size: 40px; margin-bottom: 12px; }
-.empty-title { font-size: 15px; font-weight: 600; color: #2a2520; margin-bottom: 6px; }
-.empty-sub { font-size: 13px; }
-.hidden { display: none; }
-@media (max-width: 520px) {
-  .stats { grid-template-columns: repeat(2,1fr); }
-  .action-group { margin-left: 0; }
-}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);padding:1.25rem 0 3rem;max-width:780px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:1.125rem 0}
+.stat{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.7rem .9rem}
+.stat-label{font-size:11.5px;color:var(--color-text-secondary);margin-bottom:3px;font-weight:500}
+.stat-val{font-size:24px;font-weight:500}
+.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:.875rem}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.actions{margin-left:auto;display:flex;gap:7px}
+.legend{display:flex;gap:16px;font-size:11.5px;color:var(--color-text-secondary);margin-bottom:.875rem;flex-wrap:wrap}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.cards{display:flex;flex-direction:column;gap:7px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;border-left-width:4px;border-left-style:solid}
+.card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:.8rem 1rem;cursor:pointer;user-select:none}
+.card-name{font-size:13.5px;font-weight:500;color:var(--color-text-primary)}
+.card-type{font-size:11.5px;color:var(--color-text-secondary);margin-top:2px}
+.card-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.badge{display:inline-flex;align-items:center;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;border-width:1px;border-style:solid}
+.chevron{font-size:10px;color:var(--color-text-secondary);transition:transform .18s;display:inline-block}
+.card-body{padding:.75rem 1rem .9rem;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);display:none}
+.card-body.open{display:block}
+.row{display:flex;gap:12px;font-size:12.5px;line-height:1.65;margin-bottom:7px}
+.row-label{font-size:10.5px;font-weight:500;color:var(--color-text-secondary);min-width:150px;flex-shrink:0;padding-top:2px;text-transform:uppercase;letter-spacing:.04em}
+.row-label.flag{color:#7A4500}
+.row-val{color:var(--color-text-primary)}
+.panel{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.125rem;margin-bottom:1.375rem}
+.mode-tabs{display:flex;gap:3px;padding:3px;background:var(--color-background-tertiary);border-radius:var(--border-radius-md);width:fit-content;margin-bottom:.8rem}
+.tab-btn{padding:5px 14px;font-size:12px;border-radius:6px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);font-weight:400;font-family:var(--font-sans)}
+.tab-btn.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;box-shadow:0 0 0 0.5px var(--color-border-secondary)}
+.hint{font-size:12px;color:var(--color-text-secondary);margin-bottom:.6rem;line-height:1.55}
+.trigger{display:flex;align-items:center;gap:10px;padding:.6rem .875rem;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:text;color:var(--color-text-secondary);font-size:13px}
+.ta{width:100%;height:170px;padding:.7rem .875rem;font-size:12.5px;border-radius:var(--border-radius-md);border:1.5px solid var(--color-border-primary);background:var(--color-background-primary);color:var(--color-text-primary);resize:vertical;outline:none;line-height:1.65;font-family:var(--font-sans)}
+.ta.mono{font-family:var(--font-mono)}
+.err{font-size:12px;color:var(--color-text-danger);margin-top:6px;font-weight:500}
+.btn-row{display:flex;gap:8px;margin-top:.75rem;align-items:center}
+.empty{text-align:center;padding:3rem 1rem;color:var(--color-text-secondary)}
+.empty-title{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px;margin-top:12px}
 </style>
-</head>
-<body>
-<div class="app">
 
-  <!-- Header -->
-  <div style="margin-bottom:1.125rem">
-    <h2>DD Screening Report</h2>
-    <p class="subtitle">PEP · sanctions · adverse media · registry · affiliates · remote connections &nbsp;·&nbsp; Manual verification required</p>
-  </div>
-
-  <!-- Search panel -->
-  <div class="panel">
-    <div class="tab-group">
-      <button class="tab-btn active" id="tab-ai" onclick="setMode('ai')">AI screening</button>
-      <button class="tab-btn" id="tab-paste" onclick="setMode('paste')">Paste research list</button>
-    </div>
-    <p class="panel-desc" id="panel-desc">
-      Enter entity names (one per line or comma-separated) — Claude will screen for PEP, sanctions, adverse media, company registry data, affiliate ownership chains, and remote risk connections.
-    </p>
-
-    <div id="search-idle">
-      <div class="search-placeholder" onclick="expandSearch()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9a9590" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <span id="placeholder-text">Type or paste entity names…</span>
-      </div>
-    </div>
-
-    <div id="search-expanded" class="hidden">
-      <textarea id="search-input" placeholder="Acme Capital LLC&#10;John Smith&#10;Rocket Internet GmbH & Co. KG&#10;..."></textarea>
-      <div class="error-msg hidden" id="error-msg"></div>
-      <div class="btn-row">
-        <button class="btn-primary" id="run-btn" onclick="runScreening()">Run screening</button>
-        <button class="btn-cancel" onclick="collapseSearch()">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Data area -->
-  <div id="data-area">
-    <div class="empty-state">
-      <div class="empty-icon">📋</div>
-      <div class="empty-title">No entities screened yet</div>
-      <div class="empty-sub">Use the panel above to screen entities or import a research list.</div>
-    </div>
-  </div>
-
+<div style="margin-bottom:1.125rem">
+  <h2 style="font-size:19px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px">DD screening report</h2>
+  <p style="font-size:12.5px;color:var(--color-text-secondary)">PEP · sanctions · adverse media · registry · affiliates · remote connections &nbsp;·&nbsp; Manual verification required</p>
 </div>
 
+<div class="panel" id="search-panel">
+  <div class="mode-tabs">
+    <button class="tab-btn active" id="tab-ai" onclick="switchMode('ai')">AI screening</button>
+    <button class="tab-btn" id="tab-paste" onclick="switchMode('paste')">Paste research list</button>
+  </div>
+  <p class="hint" id="hint-text">Enter entity names (one per line or comma-separated) — Claude will screen for PEP, sanctions, adverse media, company registry data, affiliate ownership chains, and remote risk connections.</p>
+  <div class="trigger" id="trigger" onclick="expandSearch()">
+    <i class="ti ti-search" style="font-size:14px" aria-hidden="true"></i>
+    <span id="trigger-text">Type or paste entity names…</span>
+  </div>
+  <div id="expanded-area" style="display:none">
+    <textarea class="ta" id="input-ta"     placeholder="Acme Capital LLC
+John Smith
+Rocket Internet GmbH
+..."></textarea>
+    <div class="err" id="err-msg" style="display:none"></div>
+    <div class="btn-row">
+      <button onclick="runScreening()" id="run-btn" style="padding:8px 20px;font-size:13px;border-radius:var(--border-radius-md);border:none;background:var(--color-text-primary);color:var(--color-background-primary);cursor:pointer;font-weight:500;font-family:var(--font-sans)">Run screening</button>
+      <button onclick="collapseSearch()" style="padding:8px 14px;font-size:12.5px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-family:var(--font-sans)">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="data-area"></div>
+
 <script>
-// ─── State ────────────────────────────────────────────────────────────────────
-var STORAGE_KEY = "dd_screening_entities_v3";
-var currentMode = "ai";
-var allData = [];
-var currentFilter = "all";
-var openCards = {};
-
-var SECTION_DEFS = [
-  { key:"pep",        label:"PEP check",              flag:false },
-  { key:"sanctions",  label:"Sanctions",              flag:false },
-  { key:"media",      label:"Adverse media",          flag:false },
-  { key:"registry",   label:"Registry data",          flag:false },
-  { key:"affiliates", label:"Affiliates & ownership", flag:true  },
-  { key:"remote",     label:"Remote connections",     flag:true  },
-  { key:"notes",      label:"Analyst notes",          flag:false },
-];
-
-var RISK_CONFIG = {
-  H: { label:"⚑ High risk", badgeBg:"#FCEBEB", badgeColor:"#7A1F1F", borderColor:"#D94040" },
-  M: { label:"⚑ Review",    badgeBg:"#FEF3E2", badgeColor:"#7A4500", borderColor:"#E8930A" },
-  L: { label:"✓ Clear",     badgeBg:"#EAF4DC", badgeColor:"#2A5A08", borderColor:"#5A9E1A" },
+const STORAGE_KEY='dd_v3';
+const RISK={
+  H:{label:'⚑ High risk',bg:'#FCEBEB',color:'#791F1F',border:'#D94040'},
+  M:{label:'⚑ Review',bg:'#FEF3E2',color:'#7A4500',border:'#E8930A'},
+  L:{label:'✓ Clear',bg:'#EAF4DC',color:'#2A5A08',border:'#5A9E1A'}
 };
+const FIELDS=[
+  {k:'pep',l:'PEP check'},
+  {k:'sanctions',l:'Sanctions'},
+  {k:'media',l:'Adverse media'},
+  {k:'registry',l:'Registry data'},
+  {k:'affiliates',l:'Affiliates & ownership',flag:true},
+  {k:'remote',l:'Remote connections',flag:true},
+  {k:'notes',l:'Analyst notes'}
+];
+const SYSTEM_AI=`You are a KYC/AML due diligence analyst with access to public corporate registries, regulatory databases, and open-source intelligence. Given a list of entity names, return a JSON array (no markdown, no preamble, no code fences) where each object has exactly these keys: name, type, risk ("H"/"M"/"L"), pep, sanctions, media, registry, affiliates, remote, notes.
+registry: jurisdiction, reg number, address, incorporation date, legal status, regulated status. "N/A" for individuals.
+affiliates: ownership structure, parent entities, subsidiaries, UBOs, GP/LP relationships, fund managers, directors, key shareholders.
+remote: two-hop indirect risk — affiliations with sanctioned/PEP-linked entities, co-investors with flagged parties, managed by firms with adverse history. "None identified." if clean.
+Risk: H=confirmed adverse/direct connection; M=elevated/requires review; L=clean and well-documented.
+Be thorough on affiliates and remote connections. Return ONLY the raw JSON array.`;
+const SYSTEM_PASTE=`You are a KYC/AML data parser. The user pastes pre-compiled research notes. Extract each entity and return a JSON array (no markdown, no preamble, no code fences) with keys: name, type, risk ("H"/"M"/"L"), pep, sanctions, media, registry, affiliates, remote, notes.
+registry: company registration details. "N/A" for individuals.
+affiliates: ownership structure, parents, UBOs, managers, directors.
+remote: two-hop indirect risk connections. "None identified." if clean.
+Risk: H=confirmed adverse; M=elevated/limited info; L=explicitly clean.
+Parse faithfully — do not invent data. If a field is not mentioned write "Not provided." Return ONLY the raw JSON array.`;
 
-var SYSTEM_AI = `You are a KYC/AML due diligence analyst with access to public corporate registries, regulatory databases, and open-source intelligence. Given a list of entity names, return a JSON array (no markdown, no preamble, no code fences) where each object has exactly these keys:
+let currentMode='ai';
+let allData=[];
+let currentFilter='all';
 
-- name (string)
-- type (string: e.g. "Individual", "Fund / LP", "Corporate / GmbH (Germany)", "Fund / SCS (Luxembourg)", etc.)
-- risk ("H", "M", or "L")
-- pep (string: PEP screening result — named individuals connected to government, state-owned enterprises, or international organisations)
-- sanctions (string: OFAC/SDN, EU, UN, UK HMT sanctions screening result)
-- media (string: adverse media — regulatory actions, litigation, enforcement, fraud allegations)
-- registry (string: company registry information — jurisdiction, registration number if known, registered address if known, incorporation date if known, legal status, regulated/supervised status. If individual, write "N/A".)
-- affiliates (string: known ownership structure, parent entities, subsidiaries, UBOs, GP/LP relationships, fund managers, managing directors, board members, key shareholders — as deep as publicly known)
-- remote (string: two-hop or indirect risk connections — e.g. affiliated with an entity that is sanctioned or PEP-linked, co-investor with flagged parties, managed by a firm with adverse history. Write "None identified." if clean.)
-- notes (string: analyst notes, recommended due diligence steps, open questions)
-
-Risk logic:
-- H = confirmed adverse finding (sanctions hit, PEP confirmed, serious adverse media, or direct connection to sanctioned/PEP entity)
-- M = elevated risk requiring manual review (crypto-sector, opaque structure, limited public profile, remote risk connection, name-screen needed)
-- L = clean and well-documented with no risk connections identified
-
-Be thorough on affiliates and remote connections — this is the most important section for compliance purposes.
-Return ONLY the raw JSON array.`;
-
-var SYSTEM_PASTE = `You are a KYC/AML data parser and compliance analyst. The user will paste pre-compiled research notes about entities in plain text.
-
-Extract each entity and return a JSON array (no markdown, no preamble, no code fences) where each object has exactly these keys:
-- name, type, risk ("H"/"M"/"L"), pep, sanctions, media, registry, affiliates, remote, notes
-
-Definitions:
-- registry: company registration details — jurisdiction, reg. number, address, incorporation date, legal status, regulated status. "N/A" for individuals.
-- affiliates: ownership structure, parent entities, subsidiaries, UBOs, GP/LP relationships, fund managers, board members, key shareholders.
-- remote: two-hop/indirect risk connections — affiliations with sanctioned or PEP-linked entities, co-investors with flagged parties. "None identified." if clean.
-
-Risk: H = confirmed adverse finding or direct connection; M = elevated risk or limited info; L = explicitly clean.
-Parse faithfully — do not invent data not in the text. If a field is not mentioned, write "Not provided." Return ONLY the raw JSON array.`;
-
-// ─── Storage helpers ──────────────────────────────────────────────────────────
-function storageGet(key) {
-  try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; }
-}
-function storageSet(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
-}
-function storageDel(key) {
-  try { localStorage.removeItem(key); } catch {}
+async function load(){
+  try{const r=await window.storage.get(STORAGE_KEY);if(r?.value)allData=JSON.parse(r.value);}catch(e){}
+  render();
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-(function init() {
-  var saved = storageGet(STORAGE_KEY);
-  if (saved && Array.isArray(saved) && saved.length) {
-    allData = saved;
-    renderDataArea();
-  }
-})();
-
-// ─── Mode switching ───────────────────────────────────────────────────────────
-function setMode(m) {
-  currentMode = m;
-  document.getElementById("tab-ai").classList.toggle("active", m === "ai");
-  document.getElementById("tab-paste").classList.toggle("active", m === "paste");
-  document.getElementById("panel-desc").textContent = m === "ai"
-    ? "Enter entity names (one per line or comma-separated) — Claude will screen for PEP, sanctions, adverse media, company registry data, affiliate ownership chains, and remote risk connections."
-    : "Paste your pre-compiled research notes in any plain text format — Claude will extract all available fields including registry data, affiliates, and indirect connections.";
-  document.getElementById("placeholder-text").textContent = m === "ai" ? "Type or paste entity names…" : "Paste research notes here…";
-  var ta = document.getElementById("search-input");
-  ta.placeholder = m === "ai" ? "Acme Capital LLC\nJohn Smith\nRocket Internet GmbH & Co. KG\n..." : "FF Pathfinder VII, LLC — Fund / LLC\nRisk: Medium\nPEP: No PEP identified...\nRegistry: Delaware LLC, reg. no. 12345...\nAffiliates: GP is Pathfinder Advisors Inc., UBO unknown...\n...";
-  ta.style.fontFamily = m === "paste" ? "monospace" : "inherit";
-  document.getElementById("run-btn").textContent = m === "ai" ? "Run screening" : "Import list";
+function switchMode(m){
+  currentMode=m;
+  document.getElementById('tab-ai').className='tab-btn'+(m==='ai'?' active':'');
+  document.getElementById('tab-paste').className='tab-btn'+(m==='paste'?' active':'');
+  document.getElementById('hint-text').textContent=m==='ai'
+    ?'Enter entity names (one per line or comma-separated) — Claude will screen for PEP, sanctions, adverse media, company registry data, affiliate ownership chains, and remote risk connections.'
+    :'Paste your pre-compiled research notes in any plain text format — Claude will extract all available fields including registry data, affiliates, and indirect connections.';
+  document.getElementById('trigger-text').textContent=m==='ai'?'Type or paste entity names…':'Paste research notes here…';
+  const ta=document.getElementById('input-ta');
+  ta.className=m==='paste'?'ta mono':'ta';
+  ta.placeholder=m==='ai'
+    ?'Acme Capital LLC\nJohn Smith\nRocket Internet GmbH\n...'
+    :'FF Pathfinder VII, LLC\nRisk: Medium\nPEP: No PEP identified...\nRegistry: Delaware LLC...\nAffiliates: GP is Pathfinder Advisors Inc...';
 }
 
-// ─── Search expand/collapse ───────────────────────────────────────────────────
-function expandSearch() {
-  document.getElementById("search-idle").classList.add("hidden");
-  document.getElementById("search-expanded").classList.remove("hidden");
-  document.getElementById("search-input").focus();
-}
-function collapseSearch() {
-  document.getElementById("search-expanded").classList.add("hidden");
-  document.getElementById("search-idle").classList.remove("hidden");
-  document.getElementById("search-input").value = "";
-  hideError();
+function expandSearch(){
+  document.getElementById('trigger').style.display='none';
+  document.getElementById('expanded-area').style.display='block';
+  setTimeout(()=>document.getElementById('input-ta').focus(),50);
 }
 
-function showError(msg) {
-  var el = document.getElementById("error-msg");
-  el.textContent = msg;
-  el.classList.remove("hidden");
-}
-function hideError() {
-  document.getElementById("error-msg").classList.add("hidden");
+function collapseSearch(){
+  document.getElementById('trigger').style.display='flex';
+  document.getElementById('expanded-area').style.display='none';
+  document.getElementById('input-ta').value='';
+  hideErr();
 }
 
-// ─── Screening ────────────────────────────────────────────────────────────────
-async function runScreening() {
-  var input = document.getElementById("search-input").value.trim();
-  if (!input) { showError("Please enter at least one entity or paste your research notes."); return; }
-  var btn = document.getElementById("run-btn");
-  btn.disabled = true;
-  btn.textContent = currentMode === "ai" ? "Screening…" : "Parsing…";
-  hideError();
+function showErr(msg){const e=document.getElementById('err-msg');e.textContent=msg;e.style.display='block';}
+function hideErr(){document.getElementById('err-msg').style.display='none';}
 
-  try {
-    var res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-6",
-        max_tokens: 6000,
-        system: currentMode === "ai" ? SYSTEM_AI : SYSTEM_PASTE,
-        messages: [{ role: "user", content: currentMode === "ai" ? "Screen the following entities:\n\n" + input : input }]
+async function runScreening(){
+  const val=document.getElementById('input-ta').value.trim();
+  if(!val){showErr('Please enter at least one entity or paste your research notes.');return;}
+  hideErr();
+  const btn=document.getElementById('run-btn');
+  btn.disabled=true;btn.textContent=currentMode==='ai'?'Screening…':'Parsing…';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',max_tokens:6000,
+        system:currentMode==='ai'?SYSTEM_AI:SYSTEM_PASTE,
+        messages:[{role:'user',content:currentMode==='ai'?`Screen the following entities:\n\n${val}`:val}]
       })
     });
-    var json = await res.json();
-    var raw = "";
-    if (json.content && Array.isArray(json.content)) {
-      for (var i = 0; i < json.content.length; i++) {
-        if (json.content[i].type === "text") { raw = json.content[i].text; break; }
-      }
-    }
-    raw = raw.replace(/```json|```/g, "").trim();
-    var parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || !parsed[0] || !parsed[0].name) throw new Error("Bad format");
-    allData = parsed;
-    storageSet(STORAGE_KEY, allData);
-    openCards = {};
-    currentFilter = "all";
+    const json=await res.json();
+    const raw=json.content?.find(b=>b.type==='text')?.text||'';
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    if(!Array.isArray(parsed)||!parsed[0]?.name)throw new Error('bad format');
+    allData=parsed;
+    await window.storage.set(STORAGE_KEY,JSON.stringify(allData));
+    currentFilter='all';
     collapseSearch();
-    renderDataArea();
-  } catch(e) {
-    showError(currentMode === "ai"
-      ? "Screening failed. Check your input and try again."
-      : "Could not parse the pasted text. Try cleaning up the format and retry.");
+    render();
+  }catch(e){
+    showErr(currentMode==='ai'?'Screening failed. Check your input and try again.':'Could not parse the pasted text. Try cleaning the format and retry.');
     console.error(e);
   }
-  btn.disabled = false;
-  btn.textContent = currentMode === "ai" ? "Run screening" : "Import list";
+  btn.disabled=false;btn.textContent=currentMode==='ai'?'Run screening':'Import list';
 }
 
-// ─── Clear ────────────────────────────────────────────────────────────────────
-function clearData() {
-  allData = []; currentFilter = "all"; openCards = {};
-  storageDel(STORAGE_KEY);
-  renderDataArea();
+async function clearData(){
+  allData=[];currentFilter='all';
+  try{await window.storage.delete(STORAGE_KEY);}catch(e){}
+  render();
 }
 
-// ─── CSV export ───────────────────────────────────────────────────────────────
-function escCsv(s) { return '"' + String(s || "").replace(/"/g, '""') + '"'; }
-function downloadCSV() {
-  var flagged = allData.filter(function(d){ return d.risk === "H" || d.risk === "M"; });
-  var riskLabel = function(r){ return r==="H"?"High":r==="M"?"Medium":"Low"; };
-  var header = ["Entity name","Entity type","Risk rating","PEP check","Sanctions","Adverse media","Registry data","Affiliates & ownership","Remote connections","Analyst notes"];
-  var rows = flagged.map(function(d){
-    return [d.name,d.type,riskLabel(d.risk),d.pep,d.sanctions,d.media,d.registry,d.affiliates,d.remote,d.notes].map(escCsv).join(",");
-  });
-  var csv = [header.map(escCsv).join(",")].concat(rows).join("\r\n");
-  var blob = new Blob([csv], { type:"text/csv;charset=utf-8;" });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement("a"); a.href = url;
-  a.download = "dd_review_" + new Date().toISOString().slice(0,10) + ".csv";
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
+function setFilter(f){currentFilter=f;renderCards();}
+
+function escCsv(s){return'"'+String(s||'').replace(/"/g,'""')+'"';}
+function downloadCSV(){
+  const flagged=allData.filter(d=>d.risk==='H'||d.risk==='M');
+  const rl=r=>r==='H'?'High':r==='M'?'Medium':'Low';
+  const header=['Entity name','Entity type','Risk rating','PEP check','Sanctions','Adverse media','Registry data','Affiliates & ownership','Remote connections','Analyst notes'];
+  const rows=flagged.map(d=>[d.name,d.type,rl(d.risk),d.pep,d.sanctions,d.media,d.registry,d.affiliates,d.remote,d.notes].map(escCsv).join(','));
+  const csv=[header.map(escCsv).join(','),...rows].join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`dd_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
 }
 
-// ─── Filter ───────────────────────────────────────────────────────────────────
-function setFilter(f) {
-  currentFilter = f;
-  renderDataArea();
+function toggleCard(id){
+  const b=document.getElementById('body-'+id);
+  const c=document.getElementById('chev-'+id);
+  const open=b.classList.toggle('open');
+  c.style.transform=open?'rotate(180deg)':'rotate(0deg)';
 }
 
-// ─── Card toggle ──────────────────────────────────────────────────────────────
-function toggleCard(idx) {
-  openCards[idx] = !openCards[idx];
-  var body = document.getElementById("card-body-" + idx);
-  var chev = document.getElementById("card-chev-" + idx);
-  if (body) body.classList.toggle("open", !!openCards[idx]);
-  if (chev) chev.classList.toggle("open", !!openCards[idx]);
+function renderCards(){
+  const visible=currentFilter==='all'?allData:allData.filter(d=>d.risk===currentFilter);
+  const counts={H:allData.filter(d=>d.risk==='H').length,M:allData.filter(d=>d.risk==='M').length,L:allData.filter(d=>d.risk==='L').length};
+
+  const fBtns=[
+    {k:'all',l:`All ${allData.length}`},
+    {k:'H',l:`High (${counts.H})`},
+    {k:'M',l:`Review (${counts.M})`},
+    {k:'L',l:`Clear (${counts.L})`}
+  ].map(({k,l})=>{
+    const active=currentFilter===k;
+    return `<button onclick="setFilter('${k}')" style="padding:5px 14px;font-size:12px;border-radius:20px;cursor:pointer;border:0.5px solid ${active?'var(--color-border-secondary)':'var(--color-border-tertiary)'};background:${active?'var(--color-text-primary)':'transparent'};color:${active?'var(--color-background-primary)':'var(--color-text-secondary)'};font-weight:${active?'500':'400'};font-family:var(--font-sans)">${l}</button>`;
+  }).join('');
+
+  const cardHTML=visible.length===0
+    ?`<p style="font-size:13px;color:var(--color-text-secondary);padding:.75rem 0">No entities match this filter.</p>`
+    :visible.map((d,i)=>{
+      const cfg=RISK[d.risk]||RISK.M;
+      const rows=FIELDS.map(({k,l,flag})=>{
+        const v=d[k];if(!v||v==='N/A'||v==='')return'';
+        return `<div class="row"><span class="row-label${flag?' flag':''}">${flag?'⚑ ':''}${l}</span><span class="row-val">${v}</span></div>`;
+      }).join('');
+      return `<div class="card" style="border-left-color:${cfg.border}">
+        <div class="card-header" onclick="toggleCard(${i})">
+          <div><div class="card-name">${d.name}</div><div class="card-type">${d.type}</div></div>
+          <div class="card-right">
+            <span class="badge" style="background:${cfg.bg};color:${cfg.color};border-color:${cfg.border}">${cfg.label}</span>
+            <span class="chevron" id="chev-${i}">▼</span>
+          </div>
+        </div>
+        <div class="card-body" id="body-${i}">${rows}</div>
+      </div>`;
+    }).join('');
+
+  document.getElementById('data-area').innerHTML=`
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-label">Total</div><div class="stat-val" style="color:var(--color-text-primary)">${allData.length}</div></div>
+      <div class="stat"><div class="stat-label">High risk</div><div class="stat-val" style="color:#791F1F">${counts.H}</div></div>
+      <div class="stat"><div class="stat-label">Review</div><div class="stat-val" style="color:#7A4500">${counts.M}</div></div>
+      <div class="stat"><div class="stat-label">Clear</div><div class="stat-val" style="color:#2A5A08">${counts.L}</div></div>
+    </div>
+    <div class="toolbar">
+      <div class="filters">${fBtns}</div>
+      <div class="actions">
+        <button onclick="downloadCSV()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 13px;font-size:12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);cursor:pointer;font-family:var(--font-sans)">
+          <i class="ti ti-download" style="font-size:14px" aria-hidden="true"></i> Export CSV
+        </button>
+        <button onclick="clearData()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 13px;font-size:12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-danger);background:var(--color-background-danger);color:var(--color-text-danger);cursor:pointer;font-family:var(--font-sans)">
+          <i class="ti ti-trash" style="font-size:14px" aria-hidden="true"></i> Clear search
+        </button>
+      </div>
+    </div>
+    <div class="legend">
+      <span style="display:flex;align-items:center;gap:5px"><span class="legend-dot" style="background:#D94040"></span>High risk — confirmed concern</span>
+      <span style="display:flex;align-items:center;gap:5px"><span class="legend-dot" style="background:#E8930A"></span>Review — manual check required</span>
+      <span style="display:flex;align-items:center;gap:5px"><span class="legend-dot" style="background:#5A9E1A"></span>Clear — no adverse findings</span>
+    </div>
+    <div class="cards">${cardHTML}</div>`;
 }
 
-// ─── Render ───────────────────────────────────────────────────────────────────
-function renderDataArea() {
-  var container = document.getElementById("data-area");
-  if (!allData.length) {
-    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No entities screened yet</div><div class="empty-sub">Use the panel above to screen entities or import a research list.</div></div>';
-    return;
-  }
-
-  var counts = {
-    H: allData.filter(function(d){ return d.risk==="H"; }).length,
-    M: allData.filter(function(d){ return d.risk==="M"; }).length,
-    L: allData.filter(function(d){ return d.risk==="L"; }).length,
-  };
-
-  var visible = currentFilter === "all" ? allData : allData.filter(function(d){ return d.risk===currentFilter; });
-
-  var html = "";
-
-  // Stats
-  html += '<div class="stats">';
-  html += statCard("Total",     allData.length, "#1a1714");
-  html += statCard("High risk", counts.H,       "#7A1F1F");
-  html += statCard("Review",    counts.M,       "#7A4500");
-  html += statCard("Clear",     counts.L,       "#2A5A08");
-  html += '</div>';
-
-  // Toolbar
-  html += '<div class="toolbar"><div class="filter-group">';
-  html += filterBtn("all", "All " + allData.length);
-  html += filterBtn("H",   "High (" + counts.H + ")");
-  html += filterBtn("M",   "Review (" + counts.M + ")");
-  html += filterBtn("L",   "Clear (" + counts.L + ")");
-  html += '</div><div class="action-group">';
-  html += '<button class="btn-export" onclick="downloadCSV()">' +
-    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>Export CSV</button>';
-  html += '<button class="btn-clear" onclick="clearData()">' +
-    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>Clear search</button>';
-  html += '</div></div>';
-
-  // Legend
-  html += '<div class="legend">';
-  html += legendItem("#D94040","High risk — confirmed concern");
-  html += legendItem("#E8930A","Review — manual check required");
-  html += legendItem("#5A9E1A","Clear — no adverse findings");
-  html += '</div>';
-
-  // Cards
-  html += '<div class="cards">';
-  if (!visible.length) {
-    html += '<div style="font-size:13px;color:#6b6560;padding:0.75rem 0">No entities match this filter.</div>';
+function render(){
+  if(allData.length===0){
+    document.getElementById('data-area').innerHTML=`<div class="empty">
+      <i class="ti ti-clipboard-list" style="font-size:40px;color:var(--color-text-secondary)" aria-hidden="true"></i>
+      <p class="empty-title">No entities screened yet</p>
+      <p style="font-size:13px">Use the panel above to screen entities or import a research list.</p>
+    </div>`;
   } else {
-    visible.forEach(function(d) {
-      var idx = allData.indexOf(d);
-      html += buildCard(d, idx);
-    });
+    renderCards();
   }
-  html += '</div>';
-
-  container.innerHTML = html;
 }
 
-function statCard(label, val, color) {
-  return '<div class="stat-card"><div class="stat-label">' + label + '</div><div class="stat-value" style="color:' + color + '">' + val + '</div></div>';
-}
-
-function filterBtn(key, label) {
-  var active = currentFilter === key ? " active" : "";
-  return '<button class="filter-btn' + active + '" onclick="setFilter(\'' + key + '\')">' + label + '</button>';
-}
-
-function legendItem(color, text) {
-  return '<span class="legend-item"><span class="dot" style="background:' + color + '"></span>' + text + '</span>';
-}
-
-function buildCard(d, idx) {
-  var cfg = RISK_CONFIG[d.risk] || RISK_CONFIG.M;
-  var isOpen = !!openCards[idx];
-
-  var findings = "";
-  SECTION_DEFS.forEach(function(sec) {
-    var val = d[sec.key];
-    if (!val || val === "N/A" || val === "") return;
-    var labelClass = "finding-label" + (sec.flag ? " flag" : "");
-    findings += '<div class="finding-row">' +
-      '<span class="' + labelClass + '">' + esc(sec.label) + '</span>' +
-      '<span class="finding-value">' + esc(val) + '</span>' +
-      '</div>';
-  });
-
-  return '<div class="card" style="border-left-color:' + cfg.borderColor + '">' +
-    '<div class="card-header" onclick="toggleCard(' + idx + ')">' +
-      '<div style="min-width:0">' +
-        '<div class="card-name">' + esc(d.name) + '</div>' +
-        '<div class="card-type">' + esc(d.type || "") + '</div>' +
-      '</div>' +
-      '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
-        '<span class="badge" style="background:' + cfg.badgeBg + ';color:' + cfg.badgeColor + ';border-color:' + cfg.borderColor + '">' + cfg.label + '</span>' +
-        '<span class="chevron' + (isOpen?" open":"") + '" id="card-chev-' + idx + '">▼</span>' +
-      '</div>' +
-    '</div>' +
-    '<div class="card-body' + (isOpen?" open":"") + '" id="card-body-' + idx + '">' + findings + '</div>' +
-  '</div>';
-}
-
-function esc(s) {
-  return String(s || "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
-}
+load();
 </script>
-</body>
-</html>
