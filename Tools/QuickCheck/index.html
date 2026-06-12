@@ -1,282 +1,401 @@
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>DD Screening</title></head>
-<body>
-  <
-<h2 class="sr-only">Due diligence screening report — PEP, sanctions, adverse media, registry and affiliate checks</h2>
+<div id="dd-app">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans);padding:1.25rem 0 3rem;max-width:780px}
-.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:1.125rem 0}
-.stat{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:.7rem .9rem}
-.stat-label{font-size:11.5px;color:var(--color-text-secondary);margin-bottom:3px;font-weight:500}
-.stat-val{font-size:24px;font-weight:500}
-.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:.875rem}
-.filters{display:flex;gap:6px;flex-wrap:wrap}
-.actions{margin-left:auto;display:flex;gap:7px}
-.legend{display:flex;gap:16px;font-size:11.5px;color:var(--color-text-secondary);margin-bottom:.875rem;flex-wrap:wrap}
-.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
-.cards{display:flex;flex-direction:column;gap:7px}
-.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;border-left-width:4px;border-left-style:solid}
-.card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:.8rem 1rem;cursor:pointer;user-select:none}
-.card-name{font-size:13.5px;font-weight:500;color:var(--color-text-primary)}
-.card-type{font-size:11.5px;color:var(--color-text-secondary);margin-top:2px}
-.card-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.badge{display:inline-flex;align-items:center;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap;border-width:1px;border-style:solid}
-.chevron{font-size:10px;color:var(--color-text-secondary);transition:transform .18s;display:inline-block}
-.card-body{padding:.75rem 1rem .9rem;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);display:none}
-.card-body.open{display:block}
-.row{display:flex;gap:12px;font-size:12.5px;line-height:1.65;margin-bottom:7px}
-.row-label{font-size:10.5px;font-weight:500;color:var(--color-text-secondary);min-width:150px;flex-shrink:0;padding-top:2px;text-transform:uppercase;letter-spacing:.04em}
-.row-label.flag{color:#7A4500}
-.row-val{color:var(--color-text-primary)}
-.panel{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.125rem;margin-bottom:1.375rem}
-.mode-tabs{display:flex;gap:3px;padding:3px;background:var(--color-background-tertiary);border-radius:var(--border-radius-md);width:fit-content;margin-bottom:.8rem}
-.tab-btn{padding:5px 14px;font-size:12px;border-radius:6px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);font-weight:400;font-family:var(--font-sans)}
-.tab-btn.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;box-shadow:0 0 0 0.5px var(--color-border-secondary)}
-.hint{font-size:12px;color:var(--color-text-secondary);margin-bottom:.6rem;line-height:1.55}
-.trigger{display:flex;align-items:center;gap:10px;padding:.6rem .875rem;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);cursor:text;color:var(--color-text-secondary);font-size:13px}
-.ta{width:100%;height:170px;padding:.7rem .875rem;font-size:12.5px;border-radius:var(--border-radius-md);border:1.5px solid var(--color-border-primary);background:var(--color-background-primary);color:var(--color-text-primary);resize:vertical;outline:none;line-height:1.65;font-family:var(--font-sans)}
-.ta.mono{font-family:var(--font-mono)}
-.err{font-size:12px;color:var(--color-text-danger);margin-top:6px;font-weight:500}
-.btn-row{display:flex;gap:8px;margin-top:.75rem;align-items:center}
-.empty{text-align:center;padding:3rem 1rem;color:var(--color-text-secondary)}
-.empty-title{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px;margin-top:12px}
+#dd-app{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#fdfcfb;color:#1a1714;padding:2rem 1.25rem 4rem;min-height:100vh;box-sizing:border-box}
+#dd-app *{box-sizing:border-box;margin:0;padding:0}
+#dd-app .wrap{max-width:780px;margin:0 auto}
+#dd-app h2.title{font-size:19px;font-weight:700;margin-bottom:3px}
+#dd-app .subtitle{font-size:12.5px;color:#6b6560;margin-bottom:1.25rem}
+#dd-app .panel{background:#f5f3f0;border:1px solid #d8d4cf;border-radius:12px;padding:1rem 1.125rem;margin-bottom:1.375rem}
+#dd-app .mode-tabs{display:flex;gap:3px;padding:3px;background:#e8e4df;border-radius:8px;width:fit-content;margin-bottom:.8rem}
+#dd-app .tab-btn{padding:5px 14px;font-size:12px;border-radius:6px;cursor:pointer;border:none;background:transparent;color:#6b6560;font-weight:400;font-family:inherit}
+#dd-app .tab-btn.active{background:#fff;color:#1a1714;font-weight:600;box-shadow:0 0 0 1px #d0cbc5}
+#dd-app .hint{font-size:12px;color:#5a5550;margin-bottom:.6rem;line-height:1.55}
+#dd-app .trigger{display:flex;align-items:center;gap:10px;padding:.6rem .875rem;background:#fff;border:1px solid #c8c4bf;border-radius:8px;cursor:text;color:#9a9590;font-size:13px}
+#dd-app .ta{width:100%;height:170px;padding:.7rem .875rem;font-size:12.5px;border-radius:8px;border:1.5px solid #3a3530;background:#fff;color:#1a1714;resize:vertical;outline:none;line-height:1.65;font-family:inherit;display:block}
+#dd-app .ta.mono{font-family:ui-monospace,Consolas,monospace}
+#dd-app .err{font-size:12px;color:#8B1A1A;margin-top:6px;font-weight:500;display:none}
+#dd-app .btn-row{display:flex;gap:8px;margin-top:.75rem;align-items:center;flex-wrap:wrap}
+#dd-app .btn-primary{padding:8px 20px;font-size:13px;border-radius:8px;border:none;background:#2a2520;color:#fff;cursor:pointer;font-weight:600;font-family:inherit}
+#dd-app .btn-primary:disabled{opacity:.65;cursor:wait}
+#dd-app .btn-plain{padding:8px 14px;font-size:12.5px;border-radius:8px;border:1px solid #c8c4bf;background:transparent;color:#4a4540;cursor:pointer;font-family:inherit}
+#dd-app .key-row{display:flex;gap:8px;align-items:center;margin-bottom:.8rem;flex-wrap:wrap}
+#dd-app .key-row label{font-size:12px;color:#5a5550;font-weight:600;white-space:nowrap}
+#dd-app .key-input{flex:1;min-width:220px;padding:.45rem .7rem;font-size:12px;border-radius:7px;border:1px solid #c8c4bf;background:#fff;color:#1a1714;outline:none;font-family:ui-monospace,Consolas,monospace}
+#dd-app .key-input:focus{border-color:#3a3530}
+#dd-app .stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.125rem}
+#dd-app .stat{background:#f5f3f0;border:1px solid #dedad6;border-radius:9px;padding:.7rem .9rem}
+#dd-app .stat-label{font-size:11.5px;color:#6b6560;margin-bottom:3px;font-weight:500}
+#dd-app .stat-val{font-size:24px;font-weight:700}
+#dd-app .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:.875rem}
+#dd-app .filters{display:flex;gap:6px;flex-wrap:wrap}
+#dd-app .actions{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+#dd-app .fbtn{padding:5px 14px;font-size:12px;border-radius:20px;cursor:pointer;border:1px solid #d8d4cf;background:#fff;color:#4a4540;font-weight:400;font-family:inherit;transition:all .15s}
+#dd-app .fbtn.active{border-color:#8a8078;background:#3a3530;color:#fff;font-weight:600}
+#dd-app .abtn{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;font-size:12px;border-radius:8px;cursor:pointer;font-weight:500;font-family:inherit}
+#dd-app .abtn.export{border:1px solid #c8c4bf;background:#fff;color:#2a2520}
+#dd-app .abtn.clear{border:1px solid #e8b4b4;background:#fdf0f0;color:#7A1F1F}
+#dd-app .legend{display:flex;gap:16px;font-size:11.5px;color:#6b6560;margin-bottom:.875rem;flex-wrap:wrap}
+#dd-app .legend span{display:flex;align-items:center;gap:5px}
+#dd-app .dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+#dd-app .cards{display:flex;flex-direction:column;gap:7px}
+#dd-app .card{background:#fff;border:1px solid #d8d4cf;border-radius:10px;overflow:hidden;border-left-width:4px;border-left-style:solid}
+#dd-app .card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:.8rem 1rem;cursor:pointer;user-select:none}
+#dd-app .card-name{font-size:13.5px;font-weight:600}
+#dd-app .card-type{font-size:11.5px;color:#6b6560;margin-top:2px}
+#dd-app .card-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+#dd-app .badge{display:inline-flex;align-items:center;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap;border-width:1px;border-style:solid}
+#dd-app .chevron{font-size:10px;color:#999;transition:transform .18s;display:inline-block}
+#dd-app .card-body{padding:.75rem 1rem .9rem;border-top:1px solid #ece9e5;background:#faf9f8;display:none}
+#dd-app .card-body.open{display:block}
+#dd-app .row{display:flex;gap:12px;font-size:12.5px;line-height:1.65;margin-bottom:7px}
+#dd-app .row-label{font-size:10.5px;font-weight:700;color:#555;min-width:150px;flex-shrink:0;padding-top:2px;text-transform:uppercase;letter-spacing:.04em}
+#dd-app .row-label.flag{color:#7A4500}
+#dd-app .row-val{color:#222}
+#dd-app .empty{text-align:center;padding:3rem 1rem;color:#6b6560}
+#dd-app .empty-icon{font-size:40px;margin-bottom:12px}
+#dd-app .empty-title{font-size:15px;font-weight:600;color:#2a2520;margin-bottom:6px}
+@media(max-width:640px){
+#dd-app .stat-grid{grid-template-columns:repeat(2,1fr)}
+#dd-app .actions{margin-left:0}
+#dd-app .row{flex-direction:column;gap:2px}
+#dd-app .row-label{min-width:auto}
+}
 </style>
 
-<div style="margin-bottom:1.125rem">
-  <h2 style="font-size:19px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px">DD screening report</h2>
-  <p style="font-size:12.5px;color:var(--color-text-secondary)">PEP · sanctions · adverse media · registry · affiliates · remote connections &nbsp;·&nbsp; Manual verification required</p>
-</div>
+<div class="wrap">
+  <h2 class="title">DD Screening Report</h2>
+  <p class="subtitle">PEP &middot; sanctions &middot; adverse media &middot; registry &middot; affiliates &middot; remote connections &nbsp;&middot;&nbsp; Manual verification required</p>
 
-<div class="panel" id="search-panel">
-  <div class="mode-tabs">
-    <button class="tab-btn active" id="tab-ai" onclick="switchMode('ai')">AI screening</button>
-    <button class="tab-btn" id="tab-paste" onclick="switchMode('paste')">Paste research list</button>
-  </div>
-  <p class="hint" id="hint-text">Enter entity names (one per line or comma-separated) — Claude will screen for PEP, sanctions, adverse media, company registry data, affiliate ownership chains, and remote risk connections.</p>
-  <div class="trigger" id="trigger" onclick="expandSearch()">
-    <i class="ti ti-search" style="font-size:14px" aria-hidden="true"></i>
-    <span id="trigger-text">Type or paste entity names…</span>
-  </div>
-  <div id="expanded-area" style="display:none">
-    <textarea class="ta" id="input-ta"     placeholder="Acme Capital LLC
-John Smith
-Rocket Internet GmbH
-..."></textarea>
-    <div class="err" id="err-msg" style="display:none"></div>
-    <div class="btn-row">
-      <button onclick="runScreening()" id="run-btn" style="padding:8px 20px;font-size:13px;border-radius:var(--border-radius-md);border:none;background:var(--color-text-primary);color:var(--color-background-primary);cursor:pointer;font-weight:500;font-family:var(--font-sans)">Run screening</button>
-      <button onclick="collapseSearch()" style="padding:8px 14px;font-size:12.5px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;font-family:var(--font-sans)">Cancel</button>
+  <div class="panel">
+    <div class="mode-tabs">
+      <button class="tab-btn active" id="tab-ai" type="button">AI screening</button>
+      <button class="tab-btn" id="tab-paste" type="button">Paste research list</button>
     </div>
-  </div>
-</div>
 
-<div id="data-area"></div>
-
-<script>
-const STORAGE_KEY='dd_v3';
-const RISK={
-  H:{label:'⚑ High risk',bg:'#FCEBEB',color:'#791F1F',border:'#D94040'},
-  M:{label:'⚑ Review',bg:'#FEF3E2',color:'#7A4500',border:'#E8930A'},
-  L:{label:'✓ Clear',bg:'#EAF4DC',color:'#2A5A08',border:'#5A9E1A'}
-};
-const FIELDS=[
-  {k:'pep',l:'PEP check'},
-  {k:'sanctions',l:'Sanctions'},
-  {k:'media',l:'Adverse media'},
-  {k:'registry',l:'Registry data'},
-  {k:'affiliates',l:'Affiliates & ownership',flag:true},
-  {k:'remote',l:'Remote connections',flag:true},
-  {k:'notes',l:'Analyst notes'}
-];
-const SYSTEM_AI=`You are a KYC/AML due diligence analyst with access to public corporate registries, regulatory databases, and open-source intelligence. Given a list of entity names, return a JSON array (no markdown, no preamble, no code fences) where each object has exactly these keys: name, type, risk ("H"/"M"/"L"), pep, sanctions, media, registry, affiliates, remote, notes.
-registry: jurisdiction, reg number, address, incorporation date, legal status, regulated status. "N/A" for individuals.
-affiliates: ownership structure, parent entities, subsidiaries, UBOs, GP/LP relationships, fund managers, directors, key shareholders.
-remote: two-hop indirect risk — affiliations with sanctioned/PEP-linked entities, co-investors with flagged parties, managed by firms with adverse history. "None identified." if clean.
-Risk: H=confirmed adverse/direct connection; M=elevated/requires review; L=clean and well-documented.
-Be thorough on affiliates and remote connections. Return ONLY the raw JSON array.`;
-const SYSTEM_PASTE=`You are a KYC/AML data parser. The user pastes pre-compiled research notes. Extract each entity and return a JSON array (no markdown, no preamble, no code fences) with keys: name, type, risk ("H"/"M"/"L"), pep, sanctions, media, registry, affiliates, remote, notes.
-registry: company registration details. "N/A" for individuals.
-affiliates: ownership structure, parents, UBOs, managers, directors.
-remote: two-hop indirect risk connections. "None identified." if clean.
-Risk: H=confirmed adverse; M=elevated/limited info; L=explicitly clean.
-Parse faithfully — do not invent data. If a field is not mentioned write "Not provided." Return ONLY the raw JSON array.`;
-
-let currentMode='ai';
-let allData=[];
-let currentFilter='all';
-
-async function load(){
-  try{const r=await window.storage.get(STORAGE_KEY);if(r?.value)allData=JSON.parse(r.value);}catch(e){}
-  render();
-}
-
-function switchMode(m){
-  currentMode=m;
-  document.getElementById('tab-ai').className='tab-btn'+(m==='ai'?' active':'');
-  document.getElementById('tab-paste').className='tab-btn'+(m==='paste'?' active':'');
-  document.getElementById('hint-text').textContent=m==='ai'
-    ?'Enter entity names (one per line or comma-separated) — Claude will screen for PEP, sanctions, adverse media, company registry data, affiliate ownership chains, and remote risk connections.'
-    :'Paste your pre-compiled research notes in any plain text format — Claude will extract all available fields including registry data, affiliates, and indirect connections.';
-  document.getElementById('trigger-text').textContent=m==='ai'?'Type or paste entity names…':'Paste research notes here…';
-  const ta=document.getElementById('input-ta');
-  ta.className=m==='paste'?'ta mono':'ta';
-  ta.placeholder=m==='ai'
-    ?'Acme Capital LLC\nJohn Smith\nRocket Internet GmbH\n...'
-    :'FF Pathfinder VII, LLC\nRisk: Medium\nPEP: No PEP identified...\nRegistry: Delaware LLC...\nAffiliates: GP is Pathfinder Advisors Inc...';
-}
-
-function expandSearch(){
-  document.getElementById('trigger').style.display='none';
-  document.getElementById('expanded-area').style.display='block';
-  setTimeout(()=>document.getElementById('input-ta').focus(),50);
-}
-
-function collapseSearch(){
-  document.getElementById('trigger').style.display='flex';
-  document.getElementById('expanded-area').style.display='none';
-  document.getElementById('input-ta').value='';
-  hideErr();
-}
-
-function showErr(msg){const e=document.getElementById('err-msg');e.textContent=msg;e.style.display='block';}
-function hideErr(){document.getElementById('err-msg').style.display='none';}
-
-async function runScreening(){
-  const val=document.getElementById('input-ta').value.trim();
-  if(!val){showErr('Please enter at least one entity or paste your research notes.');return;}
-  hideErr();
-  const btn=document.getElementById('run-btn');
-  btn.disabled=true;btn.textContent=currentMode==='ai'?'Screening…':'Parsing…';
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',max_tokens:6000,
-        system:currentMode==='ai'?SYSTEM_AI:SYSTEM_PASTE,
-        messages:[{role:'user',content:currentMode==='ai'?`Screen the following entities:\n\n${val}`:val}]
-      })
-    });
-    const json=await res.json();
-    const raw=json.content?.find(b=>b.type==='text')?.text||'';
-    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    if(!Array.isArray(parsed)||!parsed[0]?.name)throw new Error('bad format');
-    allData=parsed;
-    await window.storage.set(STORAGE_KEY,JSON.stringify(allData));
-    currentFilter='all';
-    collapseSearch();
-    render();
-  }catch(e){
-    showErr(currentMode==='ai'?'Screening failed. Check your input and try again.':'Could not parse the pasted text. Try cleaning the format and retry.');
-    console.error(e);
-  }
-  btn.disabled=false;btn.textContent=currentMode==='ai'?'Run screening':'Import list';
-}
-
-async function clearData(){
-  allData=[];currentFilter='all';
-  try{await window.storage.delete(STORAGE_KEY);}catch(e){}
-  render();
-}
-
-function setFilter(f){currentFilter=f;renderCards();}
-
-function escCsv(s){return'"'+String(s||'').replace(/"/g,'""')+'"';}
-function downloadCSV(){
-  const flagged=allData.filter(d=>d.risk==='H'||d.risk==='M');
-  const rl=r=>r==='H'?'High':r==='M'?'Medium':'Low';
-  const header=['Entity name','Entity type','Risk rating','PEP check','Sanctions','Adverse media','Registry data','Affiliates & ownership','Remote connections','Analyst notes'];
-  const rows=flagged.map(d=>[d.name,d.type,rl(d.risk),d.pep,d.sanctions,d.media,d.registry,d.affiliates,d.remote,d.notes].map(escCsv).join(','));
-  const csv=[header.map(escCsv).join(','),...rows].join('\r\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`dd_${new Date().toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
-}
-
-function toggleCard(id){
-  const b=document.getElementById('body-'+id);
-  const c=document.getElementById('chev-'+id);
-  const open=b.classList.toggle('open');
-  c.style.transform=open?'rotate(180deg)':'rotate(0deg)';
-}
-
-function renderCards(){
-  const visible=currentFilter==='all'?allData:allData.filter(d=>d.risk===currentFilter);
-  const counts={H:allData.filter(d=>d.risk==='H').length,M:allData.filter(d=>d.risk==='M').length,L:allData.filter(d=>d.risk==='L').length};
-
-  const fBtns=[
-    {k:'all',l:`All ${allData.length}`},
-    {k:'H',l:`High (${counts.H})`},
-    {k:'M',l:`Review (${counts.M})`},
-    {k:'L',l:`Clear (${counts.L})`}
-  ].map(({k,l})=>{
-    const active=currentFilter===k;
-    return `<button onclick="setFilter('${k}')" style="padding:5px 14px;font-size:12px;border-radius:20px;cursor:pointer;border:0.5px solid ${active?'var(--color-border-secondary)':'var(--color-border-tertiary)'};background:${active?'var(--color-text-primary)':'transparent'};color:${active?'var(--color-background-primary)':'var(--color-text-secondary)'};font-weight:${active?'500':'400'};font-family:var(--font-sans)">${l}</button>`;
-  }).join('');
-
-  const cardHTML=visible.length===0
-    ?`<p style="font-size:13px;color:var(--color-text-secondary);padding:.75rem 0">No entities match this filter.</p>`
-    :visible.map((d,i)=>{
-      const cfg=RISK[d.risk]||RISK.M;
-      const rows=FIELDS.map(({k,l,flag})=>{
-        const v=d[k];if(!v||v==='N/A'||v==='')return'';
-        return `<div class="row"><span class="row-label${flag?' flag':''}">${flag?'⚑ ':''}${l}</span><span class="row-val">${v}</span></div>`;
-      }).join('');
-      return `<div class="card" style="border-left-color:${cfg.border}">
-        <div class="card-header" onclick="toggleCard(${i})">
-          <div><div class="card-name">${d.name}</div><div class="card-type">${d.type}</div></div>
-          <div class="card-right">
-            <span class="badge" style="background:${cfg.bg};color:${cfg.color};border-color:${cfg.border}">${cfg.label}</span>
-            <span class="chevron" id="chev-${i}">▼</span>
-          </div>
-        </div>
-        <div class="card-body" id="body-${i}">${rows}</div>
-      </div>`;
-    }).join('');
-
-  document.getElementById('data-area').innerHTML=`
-    <div class="stat-grid">
-      <div class="stat"><div class="stat-label">Total</div><div class="stat-val" style="color:var(--color-text-primary)">${allData.length}</div></div>
-      <div class="stat"><div class="stat-label">High risk</div><div class="stat-val" style="color:#791F1F">${counts.H}</div></div>
-      <div class="stat"><div class="stat-label">Review</div><div class="stat-val" style="color:#7A4500">${counts.M}</div></div>
-      <div class="stat"><div class="stat-label">Clear</div><div class="stat-val" style="color:#2A5A08">${counts.L}</div></div>
+    <div class="key-row">
+      <label for="api-key">Anthropic API key</label>
+      <input type="password" class="key-input" id="api-key" placeholder="sk-ant-..." autocomplete="off">
     </div>
-    <div class="toolbar">
-      <div class="filters">${fBtns}</div>
-      <div class="actions">
-        <button onclick="downloadCSV()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 13px;font-size:12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);cursor:pointer;font-family:var(--font-sans)">
-          <i class="ti ti-download" style="font-size:14px" aria-hidden="true"></i> Export CSV
-        </button>
-        <button onclick="clearData()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 13px;font-size:12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-danger);background:var(--color-background-danger);color:var(--color-text-danger);cursor:pointer;font-family:var(--font-sans)">
-          <i class="ti ti-trash" style="font-size:14px" aria-hidden="true"></i> Clear search
-        </button>
+
+    <p class="hint" id="hint-text">Enter entity names (one per line or comma-separated) &mdash; Claude will screen for PEP, sanctions, adverse media, company registry data, affiliate ownership chains, and remote risk connections.</p>
+
+    <div class="trigger" id="trigger">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9a9590" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <span id="trigger-text">Type or paste entity names&hellip;</span>
+    </div>
+
+    <div id="expanded-area" style="display:none">
+      <textarea class="ta" id="input-ta"></textarea>
+      <div class="err" id="err-msg"></div>
+      <div class="btn-row">
+        <button class="btn-primary" id="run-btn" type="button">Run screening</button>
+        <button class="btn-plain" id="cancel-btn" type="button">Cancel</button>
       </div>
     </div>
-    <div class="legend">
-      <span style="display:flex;align-items:center;gap:5px"><span class="legend-dot" style="background:#D94040"></span>High risk — confirmed concern</span>
-      <span style="display:flex;align-items:center;gap:5px"><span class="legend-dot" style="background:#E8930A"></span>Review — manual check required</span>
-      <span style="display:flex;align-items:center;gap:5px"><span class="legend-dot" style="background:#5A9E1A"></span>Clear — no adverse findings</span>
-    </div>
-    <div class="cards">${cardHTML}</div>`;
-}
+  </div>
 
-function render(){
-  if(allData.length===0){
-    document.getElementById('data-area').innerHTML=`<div class="empty">
-      <i class="ti ti-clipboard-list" style="font-size:40px;color:var(--color-text-secondary)" aria-hidden="true"></i>
-      <p class="empty-title">No entities screened yet</p>
-      <p style="font-size:13px">Use the panel above to screen entities or import a research list.</p>
-    </div>`;
-  } else {
-    renderCards();
+  <div id="data-area"></div>
+</div>
+</div>
+
+<script>
+(function () {
+  var STORAGE_KEY = 'dd_screening_v4';
+  var API_KEY_STORAGE = 'dd_api_key';
+  var hasLS = false;
+  try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); hasLS = true; } catch (e) { hasLS = false; }
+  var mem = {};
+
+  function storeGet(k) {
+    if (hasLS) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+    return mem[k] || null;
   }
-}
+  function storeSet(k, v) {
+    if (hasLS) { try { localStorage.setItem(k, v); return; } catch (e) {} }
+    mem[k] = v;
+  }
+  function storeDel(k) {
+    if (hasLS) { try { localStorage.removeItem(k); return; } catch (e) {} }
+    delete mem[k];
+  }
 
-load();
-</script>->
-</body>
-</html>
+  var RISK = {
+    H: { label: '\u2691 High risk', bg: '#FCEBEB', color: '#7A1F1F', border: '#D94040' },
+    M: { label: '\u2691 Review', bg: '#FEF3E2', color: '#7A4500', border: '#E8930A' },
+    L: { label: '\u2713 Clear', bg: '#EAF4DC', color: '#2A5A08', border: '#5A9E1A' }
+  };
+
+  var FIELDS = [
+    { k: 'pep', l: 'PEP check', flag: false },
+    { k: 'sanctions', l: 'Sanctions', flag: false },
+    { k: 'media', l: 'Adverse media', flag: false },
+    { k: 'registry', l: 'Registry data', flag: false },
+    { k: 'affiliates', l: 'Affiliates &amp; ownership', flag: true },
+    { k: 'remote', l: 'Remote connections', flag: true },
+    { k: 'notes', l: 'Analyst notes', flag: false }
+  ];
+
+  var SYSTEM_AI = 'You are a KYC/AML due diligence analyst with knowledge of public corporate registries, regulatory databases, and open-source intelligence. Given a list of entity names, return a JSON array (no markdown, no preamble, no code fences) where each object has exactly these keys: name, type, risk ("H"/"M"/"L"), pep, sanctions, media, registry, affiliates, remote, notes.\n' +
+  'registry: jurisdiction, reg number, address, incorporation date, legal status, regulated status. "N/A" for individuals.\n' +
+  'affiliates: ownership structure, parent entities, subsidiaries, UBOs, GP/LP relationships, fund managers, directors, key shareholders.\n' +
+  'remote: two-hop indirect risk - affiliations with sanctioned/PEP-linked entities, co-investors with flagged parties, managed by firms with adverse history. "None identified." if clean.\n' +
+  'Risk: H=confirmed adverse/direct connection; M=elevated/requires review; L=clean and well-documented.\n' +
+  'Be thorough on affiliates and remote connections. Return ONLY the raw JSON array.';
+
+  var SYSTEM_PASTE = 'You are a KYC/AML data parser. The user pastes pre-compiled research notes. Extract each entity and return a JSON array (no markdown, no preamble, no code fences) with keys: name, type, risk ("H"/"M"/"L"), pep, sanctions, media, registry, affiliates, remote, notes.\n' +
+  'registry: company registration details. "N/A" for individuals.\n' +
+  'affiliates: ownership structure, parents, UBOs, managers, directors.\n' +
+  'remote: two-hop indirect risk connections. "None identified." if clean.\n' +
+  'Risk: H=confirmed adverse; M=elevated/limited info; L=explicitly clean.\n' +
+  'Parse faithfully - do not invent data. If a field is not mentioned write "Not provided." Return ONLY the raw JSON array.';
+
+  var currentMode = 'ai';
+  var allData = [];
+  var currentFilter = 'all';
+
+  function $(id) { return document.getElementById(id); }
+
+  function loadState() {
+    var raw = storeGet(STORAGE_KEY);
+    if (raw) { try { allData = JSON.parse(raw); } catch (e) {} }
+    var k = storeGet(API_KEY_STORAGE);
+    if (k) $('api-key').value = k;
+    render();
+  }
+
+  function switchMode(m) {
+    currentMode = m;
+    $('tab-ai').className = 'tab-btn' + (m === 'ai' ? ' active' : '');
+    $('tab-paste').className = 'tab-btn' + (m === 'paste' ? ' active' : '');
+    $('hint-text').textContent = m === 'ai'
+      ? 'Enter entity names (one per line or comma-separated) \u2014 Claude will screen for PEP, sanctions, adverse media, company registry data, affiliate ownership chains, and remote risk connections.'
+      : 'Paste your pre-compiled research notes in any plain text format \u2014 Claude will extract all available fields including registry data, affiliates, and indirect connections.';
+    $('trigger-text').textContent = m === 'ai' ? 'Type or paste entity names\u2026' : 'Paste research notes here\u2026';
+    var ta = $('input-ta');
+    ta.className = m === 'paste' ? 'ta mono' : 'ta';
+    ta.placeholder = m === 'ai'
+      ? 'Acme Capital LLC\nJohn Smith\nRocket Internet GmbH\n...'
+      : 'FF Pathfinder VII, LLC\nRisk: Medium\nPEP: No PEP identified...\nRegistry: Delaware LLC...\nAffiliates: GP is Pathfinder Advisors Inc...';
+    $('run-btn').textContent = m === 'ai' ? 'Run screening' : 'Import list';
+  }
+
+  function expandSearch() {
+    $('trigger').style.display = 'none';
+    $('expanded-area').style.display = 'block';
+    setTimeout(function () { $('input-ta').focus(); }, 50);
+  }
+
+  function collapseSearch() {
+    $('trigger').style.display = 'flex';
+    $('expanded-area').style.display = 'none';
+    $('input-ta').value = '';
+    hideErr();
+  }
+
+  function showErr(msg) { var e = $('err-msg'); e.textContent = msg; e.style.display = 'block'; }
+  function hideErr() { $('err-msg').style.display = 'none'; }
+
+  function runScreening() {
+    var val = $('input-ta').value.trim();
+    var apiKey = $('api-key').value.trim();
+    if (!apiKey) { showErr('Please enter your Anthropic API key (stored locally in your browser only).'); return; }
+    if (!val) { showErr('Please enter at least one entity or paste your research notes.'); return; }
+    hideErr();
+    storeSet(API_KEY_STORAGE, apiKey);
+
+    var btn = $('run-btn');
+    btn.disabled = true;
+    btn.textContent = currentMode === 'ai' ? 'Screening\u2026' : 'Parsing\u2026';
+
+    function done() {
+      btn.disabled = false;
+      btn.textContent = currentMode === 'ai' ? 'Run screening' : 'Import list';
+    }
+
+    fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 6000,
+        system: currentMode === 'ai' ? SYSTEM_AI : SYSTEM_PASTE,
+        messages: [{ role: 'user', content: currentMode === 'ai' ? 'Screen the following entities:\n\n' + val : val }]
+      })
+    })
+    .then(function (res) {
+      if (!res.ok) { throw new Error('API error ' + res.status); }
+      return res.json();
+    })
+    .then(function (json) {
+      var raw = '';
+      if (json.content) {
+        for (var i = 0; i < json.content.length; i++) {
+          if (json.content[i].type === 'text') { raw = json.content[i].text; break; }
+        }
+      }
+      var parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+      if (!parsed || !parsed.length || !parsed[0].name) { throw new Error('bad format'); }
+      allData = parsed;
+      storeSet(STORAGE_KEY, JSON.stringify(allData));
+      currentFilter = 'all';
+      collapseSearch();
+      render();
+      done();
+    })
+    .catch(function (e) {
+      var s = String(e);
+      var msg;
+      if (s.indexOf('401') > -1) { msg = 'Invalid API key. Check your key and try again.'; }
+      else if (s.indexOf('API error') > -1) { msg = 'API request failed. Check your key and network.'; }
+      else if (currentMode === 'ai') { msg = 'Screening failed. Check your input and try again.'; }
+      else { msg = 'Could not parse the pasted text. Try cleaning the format and retry.'; }
+      showErr(msg);
+      done();
+    });
+  }
+
+  function clearData() {
+    allData = [];
+    currentFilter = 'all';
+    storeDel(STORAGE_KEY);
+    render();
+  }
+
+  function setFilter(f) { currentFilter = f; renderCards(); }
+
+  function escCsv(s) { return '"' + String(s || '').replace(/"/g, '""') + '"'; }
+  function escHtml(s) {
+    return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function downloadCSV() {
+    var flagged = allData.filter(function (d) { return d.risk === 'H' || d.risk === 'M'; });
+    function rl(r) { if (r === 'H') return 'High'; if (r === 'M') return 'Medium'; return 'Low'; }
+    var header = ['Entity name', 'Entity type', 'Risk rating', 'PEP check', 'Sanctions', 'Adverse media', 'Registry data', 'Affiliates and ownership', 'Remote connections', 'Analyst notes'];
+    var rows = flagged.map(function (d) {
+      return [d.name, d.type, rl(d.risk), d.pep, d.sanctions, d.media, d.registry, d.affiliates, d.remote, d.notes].map(escCsv).join(',');
+    });
+    var csv = [header.map(escCsv).join(',')].concat(rows).join('\r\n');
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'dd_review_' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function toggleCard(id) {
+    var b = $('body-' + id);
+    var c = $('chev-' + id);
+    var open = b.classList.toggle('open');
+    c.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+  }
+
+  function renderCards() {
+    var visible = currentFilter === 'all' ? allData : allData.filter(function (d) { return d.risk === currentFilter; });
+    var counts = {
+      H: allData.filter(function (d) { return d.risk === 'H'; }).length,
+      M: allData.filter(function (d) { return d.risk === 'M'; }).length,
+      L: allData.filter(function (d) { return d.risk === 'L'; }).length
+    };
+
+    var fDefs = [
+      { k: 'all', l: 'All ' + allData.length },
+      { k: 'H', l: 'High (' + counts.H + ')' },
+      { k: 'M', l: 'Review (' + counts.M + ')' },
+      { k: 'L', l: 'Clear (' + counts.L + ')' }
+    ];
+    var fBtns = fDefs.map(function (f) {
+      return '<button type="button" class="fbtn' + (currentFilter === f.k ? ' active' : '') + '" data-filter="' + f.k + '">' + f.l + '</button>';
+    }).join('');
+
+    var cardHTML;
+    if (visible.length === 0) {
+      cardHTML = '<p style="font-size:13px;color:#6b6560;padding:.75rem 0">No entities match this filter.</p>';
+    } else {
+      cardHTML = visible.map(function (d, i) {
+        var cfg = RISK[d.risk] || RISK.M;
+        var rows = FIELDS.map(function (f) {
+          var v = d[f.k];
+          if (!v || v === 'N/A' || v === '') { return ''; }
+          return '<div class="row"><span class="row-label' + (f.flag ? ' flag' : '') + '">' + (f.flag ? '\u2691 ' : '') + f.l + '</span><span class="row-val">' + escHtml(v) + '</span></div>';
+        }).join('');
+        return '<div class="card" style="border-left-color:' + cfg.border + '">' +
+          '<div class="card-header" data-toggle="' + i + '">' +
+            '<div><div class="card-name">' + escHtml(d.name) + '</div><div class="card-type">' + escHtml(d.type) + '</div></div>' +
+            '<div class="card-right">' +
+              '<span class="badge" style="background:' + cfg.bg + ';color:' + cfg.color + ';border-color:' + cfg.border + '">' + cfg.label + '</span>' +
+              '<span class="chevron" id="chev-' + i + '">\u25BC</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="card-body" id="body-' + i + '">' + rows + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    var statHTML = '<div class="stat-grid">' +
+      '<div class="stat"><div class="stat-label">Total</div><div class="stat-val" style="color:#1a1714">' + allData.length + '</div></div>' +
+      '<div class="stat"><div class="stat-label">High risk</div><div class="stat-val" style="color:#7A1F1F">' + counts.H + '</div></div>' +
+      '<div class="stat"><div class="stat-label">Review</div><div class="stat-val" style="color:#7A4500">' + counts.M + '</div></div>' +
+      '<div class="stat"><div class="stat-label">Clear</div><div class="stat-val" style="color:#2A5A08">' + counts.L + '</div></div>' +
+    '</div>';
+
+    var toolbarHTML = '<div class="toolbar">' +
+      '<div class="filters">' + fBtns + '</div>' +
+      '<div class="actions">' +
+        '<button type="button" class="abtn export" id="export-btn">Export CSV</button>' +
+        '<button type="button" class="abtn clear" id="clear-btn">Clear search</button>' +
+      '</div>' +
+    '</div>';
+
+    var legendHTML = '<div class="legend">' +
+      '<span><span class="dot" style="background:#D94040"></span>High risk \u2014 confirmed concern</span>' +
+      '<span><span class="dot" style="background:#E8930A"></span>Review \u2014 manual check required</span>' +
+      '<span><span class="dot" style="background:#5A9E1A"></span>Clear \u2014 no adverse findings</span>' +
+    '</div>';
+
+    $('data-area').innerHTML = statHTML + toolbarHTML + legendHTML + '<div class="cards">' + cardHTML + '</div>';
+
+    var fb = $('data-area').querySelectorAll('.fbtn');
+    for (var i = 0; i < fb.length; i++) {
+      fb[i].addEventListener('click', function () { setFilter(this.getAttribute('data-filter')); });
+    }
+    var th = $('data-area').querySelectorAll('[data-toggle]');
+    for (var j = 0; j < th.length; j++) {
+      th[j].addEventListener('click', function () { toggleCard(this.getAttribute('data-toggle')); });
+    }
+    var eb = $('export-btn');
+    if (eb) { eb.addEventListener('click', downloadCSV); }
+    var cb = $('clear-btn');
+    if (cb) { cb.addEventListener('click', clearData); }
+  }
+
+  function render() {
+    if (allData.length === 0) {
+      $('data-area').innerHTML = '<div class="empty">' +
+        '<div class="empty-icon">\uD83D\uDCCB</div>' +
+        '<p class="empty-title">No entities screened yet</p>' +
+        '<p style="font-size:13px">Use the panel above to screen entities or import a research list.</p>' +
+      '</div>';
+    } else {
+      renderCards();
+    }
+  }
+
+  $('tab-ai').addEventListener('click', function () { switchMode('ai'); });
+  $('tab-paste').addEventListener('click', function () { switchMode('paste'); });
+  $('trigger').addEventListener('click', expandSearch);
+  $('cancel-btn').addEventListener('click', collapseSearch);
+  $('run-btn').addEventListener('click', runScreening);
+  switchMode('ai');
+  loadState();
+})();
+</script>
