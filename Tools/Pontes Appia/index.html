@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A graduate course on the Eurosystem's Pontes and Appia DLT settlement programme: nine modules of verified official sources, a two-lane chronology, self-assessment and glossary.">
+<meta name="color-scheme" content="light dark">
+<title>Pontes and Appia</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#E7E8E3;
+  --surface:#F1F2EE;
+  --surface-2:#DDDFD8;
+  --ink:#1A1D19;
+  --ink-2:#4E544C;
+  --ink-3:#767C73;
+  --rule:#C3C7BC;
+  --rule-soft:#D4D7CE;
+  --accent:#9C3520;
+  --accent-soft:#C4705C;
+  --accent-wash:#EFDFDA;
+  --link:#2B4A6B;
+  --good:#3D6B4C;
+  --good-wash:#DDE6DC;
+  --shadow:0 1px 0 rgba(26,29,25,.06), 0 8px 24px -18px rgba(26,29,25,.4);
+  --serif:"Spectral",Iowan Old Style,Palatino,Georgia,serif;
+  --roman:"Cinzel","Spectral",Georgia,serif;
+  --sans:"IBM Plex Sans",-apple-system,Segoe UI,Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#141714;
+    --surface:#1C201C;
+    --surface-2:#252A25;
+    --ink:#E6E8E2;
+    --ink-2:#B0B6AC;
+    --ink-3:#848A80;
+    --rule:#333A33;
+    --rule-soft:#2A302A;
+    --accent:#D9705A;
+    --accent-soft:#8E4634;
+    --accent-wash:#2E211D;
+    --link:#8FB3D6;
+    --good:#7FB48D;
+    --good-wash:#1E2A20;
+    --shadow:0 1px 0 rgba(0,0,0,.4), 0 10px 28px -20px #000;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141714;
+  --surface:#1C201C;
+  --surface-2:#252A25;
+  --ink:#E6E8E2;
+  --ink-2:#B0B6AC;
+  --ink-3:#848A80;
+  --rule:#333A33;
+  --rule-soft:#2A302A;
+  --accent:#D9705A;
+  --accent-soft:#8E4634;
+  --accent-wash:#2E211D;
+  --link:#8FB3D6;
+  --good:#7FB48D;
+  --good-wash:#1E2A20;
+  --shadow:0 1px 0 rgba(0,0,0,.4), 0 10px 28px -20px #000;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--link);text-underline-offset:2px;text-decoration-thickness:.06em}
+a:hover{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+h1,h2,h3{text-wrap:balance;margin:0}
+
+/* ---------- shell ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 80px}
+
+header.top{
+  position:sticky;top:0;z-index:30;
+  background:var(--paper);
+  border-bottom:1px solid var(--rule);
+}
+.top-inner{max-width:1180px;margin:0 auto;padding:14px 24px 0;display:flex;flex-direction:column;gap:12px}
+.brandline{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.mark{
+  font-family:var(--roman);font-weight:600;font-size:20px;letter-spacing:.14em;
+  text-transform:uppercase;line-height:1;
+}
+.mark .dot{color:var(--accent);padding:0 .35em}
+.tagline{font-family:var(--sans);font-size:12px;color:var(--ink-3);letter-spacing:.02em}
+.spacer{flex:1}
+.iconbtn{
+  font-family:var(--sans);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-3);border:1px solid var(--rule);border-radius:2px;padding:5px 10px;
+}
+.iconbtn:hover{color:var(--accent);border-color:var(--accent-soft)}
+
+/* milestone progress road */
+.road{display:flex;align-items:center;gap:12px;padding-bottom:2px}
+.road-track{
+  position:relative;flex:1;height:14px;
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  background:repeating-linear-gradient(90deg,var(--rule-soft) 0 12px,transparent 12px 26px);
+}
+.road-fill{position:absolute;inset:0 auto 0 0;background:var(--accent-soft);opacity:.55;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+.road-mile{position:absolute;top:-4px;width:2px;height:22px;background:var(--rule);transform:translateX(-1px)}
+.road-mile.hit{background:var(--accent)}
+.road-count{font-family:var(--mono);font-size:12px;color:var(--ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+nav.tabs{display:flex;gap:2px;overflow-x:auto}
+nav.tabs button{
+  font-family:var(--sans);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;
+  padding:10px 14px;color:var(--ink-3);border-bottom:2px solid transparent;white-space:nowrap;
+}
+nav.tabs button:hover{color:var(--ink)}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+/* ---------- course layout ---------- */
+.course{display:grid;grid-template-columns:236px 1fr;gap:40px;padding-top:34px;align-items:start}
+@media (max-width:880px){.course{grid-template-columns:1fr;gap:24px}}
+
+.rail{position:sticky;top:132px}
+@media (max-width:880px){.rail{position:static}}
+.rail-title{font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:12px}
+.rail-list{position:relative;display:flex;flex-direction:column;gap:1px}
+.rail-list::before{content:"";position:absolute;left:15px;top:14px;bottom:14px;width:1px;background:var(--rule)}
+.mile{
+  position:relative;display:flex;gap:12px;align-items:flex-start;
+  padding:7px 8px 7px 0;text-align:left;width:100%;border-radius:2px;
+}
+.mile:hover{background:var(--surface)}
+.mile .stone{
+  position:relative;z-index:1;flex:none;width:30px;height:30px;border-radius:2px;
+  display:grid;place-items:center;
+  font-family:var(--roman);font-size:11.5px;font-weight:600;letter-spacing:.02em;
+  background:var(--surface);border:1px solid var(--rule);color:var(--ink-3);
+  transition:background .2s,border-color .2s,color .2s;
+}
+.mile .lbl{font-family:var(--sans);font-size:12.5px;line-height:1.35;color:var(--ink-2);padding-top:6px}
+.mile[aria-current="true"] .stone{background:var(--accent);border-color:var(--accent);color:#F6EFEC}
+.mile[aria-current="true"] .lbl{color:var(--ink);font-weight:500}
+.mile.done .stone{border-color:var(--good);color:var(--good)}
+.mile[aria-current="true"].done .stone{background:var(--good);border-color:var(--good);color:var(--paper)}
+
+/* ---------- module ---------- */
+.eyebrow{font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+h2.mod-title{font-family:var(--serif);font-weight:600;font-size:clamp(26px,3.4vw,36px);line-height:1.15;letter-spacing:-.012em;margin-bottom:14px}
+.brief{font-size:17px;line-height:1.62;color:var(--ink-2);max-width:64ch;margin-bottom:6px}
+.brief strong{color:var(--ink);font-weight:600}
+
+.toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:26px 0 14px;padding-top:16px;border-top:1px solid var(--rule)}
+.toolbar h3{font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+.chip{
+  font-family:var(--sans);font-size:11.5px;letter-spacing:.04em;
+  border:1px solid var(--rule);border-radius:999px;padding:4px 11px;color:var(--ink-3);
+}
+.chip[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:var(--accent-wash)}
+
+.sources{display:flex;flex-direction:column;gap:8px;max-width:78ch}
+.src{
+  display:grid;grid-template-columns:auto 1fr;gap:14px;
+  background:var(--surface);border:1px solid var(--rule-soft);border-left:3px solid var(--rule);
+  padding:13px 15px;border-radius:2px;transition:border-color .2s,background .2s;
+}
+.src:hover{border-color:var(--rule)}
+.src.read{border-left-color:var(--good);background:var(--good-wash)}
+.src.amlhit{border-left-color:var(--accent)}
+.src.read.amlhit{border-left-color:var(--good)}
+.tick{
+  flex:none;width:20px;height:20px;margin-top:3px;border:1px solid var(--ink-3);border-radius:2px;
+  background:transparent;display:grid;place-items:center;color:transparent;font-size:12px;line-height:1;
+}
+.src.read .tick{background:var(--good);border-color:var(--good);color:var(--paper)}
+.src-t{font-size:15.5px;line-height:1.4;font-weight:500}
+.src-t a{text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--link) 40%,transparent)}
+.src-t a:hover{border-bottom-color:var(--accent)}
+.src-m{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:5px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.badge{font-family:var(--sans);font-size:10px;letter-spacing:.09em;text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid var(--rule)}
+.badge.primary{color:var(--accent);border-color:var(--accent-soft)}
+.badge.legal{color:var(--link);border-color:color-mix(in srgb,var(--link) 45%,transparent)}
+.badge.trade{color:var(--ink-3)}
+.badge.aml{background:var(--accent);border-color:var(--accent);color:#F6EFEC}
+.src-n{font-size:14px;color:var(--ink-2);margin-top:7px;line-height:1.5}
+
+.callout{
+  margin-top:26px;padding:16px 18px;border:1px solid var(--accent-soft);border-radius:2px;
+  background:var(--accent-wash);max-width:72ch;
+}
+.callout h4{font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.callout p{margin:0;font-size:15px;line-height:1.55;color:var(--ink)}
+
+.modnav{display:flex;justify-content:space-between;gap:12px;margin-top:40px;padding-top:18px;border-top:1px solid var(--rule)}
+.modnav button{font-family:var(--sans);font-size:13px;color:var(--ink-2);padding:8px 0}
+.modnav button:hover{color:var(--accent)}
+.modnav button:disabled{opacity:.3;cursor:default}
+
+/* ---------- timeline ---------- */
+.tl-head{padding-top:34px;max-width:66ch}
+h2.view-title{font-family:var(--serif);font-weight:600;font-size:clamp(24px,3vw,32px);letter-spacing:-.01em;margin-bottom:10px}
+.view-sub{color:var(--ink-2);font-size:16px;margin-bottom:6px}
+.lanekey{display:flex;gap:18px;margin:22px 0 10px;font-family:var(--sans);font-size:12px;color:var(--ink-3);flex-wrap:wrap}
+.lanekey span{display:flex;align-items:center;gap:7px}
+.swatch{width:11px;height:11px;border-radius:2px;display:inline-block}
+.tl{position:relative;margin-top:8px;padding-left:0}
+.tl::before{content:"";position:absolute;left:120px;top:6px;bottom:6px;width:1px;background:var(--rule)}
+@media (max-width:700px){.tl::before{left:8px}}
+.ev{display:grid;grid-template-columns:112px 1fr;gap:48px;padding:9px 0;align-items:start}
+@media (max-width:700px){.ev{grid-template-columns:1fr;gap:2px;padding-left:26px}}
+.ev-d{font-family:var(--mono);font-size:12px;color:var(--ink-3);text-align:right;padding-top:3px;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:700px){.ev-d{text-align:left}}
+.ev-b{position:relative}
+.ev-b::before{
+  content:"";position:absolute;left:-44px;top:9px;width:9px;height:9px;border-radius:50%;
+  background:var(--paper);border:2px solid var(--rule);
+}
+@media (max-width:700px){.ev-b::before{left:-24px}}
+.ev.lane-e .ev-b::before{border-color:var(--accent)}
+.ev.lane-l .ev-b::before{border-color:var(--link)}
+.ev.future .ev-b::before{border-style:dashed}
+.ev-t{font-size:15.5px;line-height:1.45}
+.ev-n{font-size:14px;color:var(--ink-2);margin-top:3px;line-height:1.5}
+.ev.future .ev-t{color:var(--ink-2);font-style:italic}
+
+/* ---------- assessment ---------- */
+.qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;margin-top:26px;align-items:start}
+.q{
+  background:var(--surface);border:1px solid var(--rule-soft);border-radius:2px;
+  padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px;
+}
+.q-n{font-family:var(--roman);font-size:12px;letter-spacing:.1em;color:var(--accent)}
+.q-t{font-size:16px;line-height:1.45;font-weight:500}
+.q-a{font-size:14.5px;line-height:1.55;color:var(--ink-2);border-top:1px solid var(--rule-soft);padding-top:12px}
+.q-a h5{font-family:var(--sans);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px;font-weight:500}
+.q button.reveal{
+  font-family:var(--sans);font-size:12px;letter-spacing:.05em;color:var(--ink-3);
+  border:1px solid var(--rule);border-radius:2px;padding:6px 12px;align-self:flex-start;
+}
+.q button.reveal:hover{color:var(--accent);border-color:var(--accent-soft)}
+
+/* ---------- glossary ---------- */
+.gl{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:2px;margin-top:26px}
+.gt{padding:15px 0;border-top:1px solid var(--rule-soft)}
+.gt dt{font-family:var(--sans);font-weight:600;font-size:14px;letter-spacing:.01em;margin-bottom:5px}
+.gt dd{margin:0;font-size:14.5px;line-height:1.55;color:var(--ink-2)}
+.gt dd em{color:var(--ink-3);font-style:italic}
+
+footer.foot{margin-top:60px;padding-top:20px;border-top:1px solid var(--rule);font-family:var(--sans);font-size:12px;color:var(--ink-3);line-height:1.6;max-width:74ch}
+.hidden{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brandline">
+      <div class="mark">Pontes<span class="dot">&#183;</span>Appia</div>
+      <div class="tagline">Eurosystem DLT settlement &#183; graduate course &#183; sources verified to 1 September 2026</div>
+      <div class="spacer"></div>
+      <button class="iconbtn" id="resetBtn">Reset progress</button>
+    </div>
+    <div class="road">
+      <div class="road-track" id="roadTrack"><div class="road-fill" id="roadFill" style="width:0%"></div></div>
+      <div class="road-count" id="roadCount">0 / 0 read</div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-view="course" aria-selected="true">Course</button>
+      <button role="tab" data-view="timeline" aria-selected="false">Chronology</button>
+      <button role="tab" data-view="assess" aria-selected="false">Self-assessment</button>
+      <button role="tab" data-view="glossary" aria-selected="false">Glossary</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <section id="view-course" class="course">
+    <aside class="rail">
+      <div class="rail-title">Milestones</div>
+      <div class="rail-list" id="rail"></div>
+    </aside>
+    <main id="modulePane"></main>
+  </section>
+
+  <section id="view-timeline" class="hidden">
+    <div class="tl-head">
+      <h2 class="view-title">Chronology</h2>
+      <p class="view-sub">Two lanes run in parallel. The Eurosystem builds the settlement rail; the legislator moves the compliance perimeter underneath it. Dates after today are shown dashed.</p>
+    </div>
+    <div class="lanekey">
+      <span><i class="swatch" style="background:var(--accent)"></i> Eurosystem delivery</span>
+      <span><i class="swatch" style="background:var(--link)"></i> Law, AML and comparators</span>
+      <span><i class="swatch" style="background:var(--rule)"></i> Expected, not confirmed</span>
+    </div>
+    <div class="tl" id="tl"></div>
+  </section>
+
+  <section id="view-assess" class="hidden">
+    <div class="tl-head">
+      <h2 class="view-title">Self-assessment</h2>
+      <p class="view-sub">Answer aloud before revealing. The reveal is not a model answer, it is the list of things a strong answer has to contain.</p>
+    </div>
+    <div class="qgrid" id="qgrid"></div>
+  </section>
+
+  <section id="view-glossary" class="hidden">
+    <div class="tl-head">
+      <h2 class="view-title">Glossary</h2>
+      <p class="view-sub">Terms used without explanation in the primary sources.</p>
+    </div>
+    <dl class="gl" id="gl"></dl>
+  </section>
+
+  <footer class="foot">
+    Compiled 1 September 2026 from official Eurosystem, EU and international institutional sources, with one trade-press item marked as such. The 21 September 2026 go-live is reported by trade press and fits the ECB's published testing timetable; no ECB press release confirms that date. Progress is stored for you alone and survives updates to this page.
+  </footer>
+</div>
+
+<script>
+/* ============================ CONTENT ============================ */
+const MODULES = [
+ {id:"m1", n:"I", label:"The settlement-asset problem",
+  title:"Why this exists: the settlement-asset problem",
+  brief:"Start with the conceptual claim, not the plumbing. The Eurosystem's position is that tokenisation is desirable but that a tokenised market settling in private money alone would erode the <strong>two-tier monetary system</strong> and the <strong>singleness of money</strong>. Pontes and Appia are the operational answer to that claim. Read these three as the theoretical frame against which every later design decision is judged.",
+  callout:{h:"What to argue with",p:"Schnabel's case rests on elasticity: only a central bank can expand liquidity without limit in stress, so only central bank money is a safe settlement asset. Test whether that argument holds for a wholesale market that settles atomically and prefunded, where liquidity expansion may matter less than it does in a deferred net settlement system."},
+  sources:[
+   {id:"s1a",t:"Central banks on-chain",pub:"Isabel Schnabel, Jackson Hole Economic Policy Symposium",d:"28 Aug 2026",k:"primary",u:"https://www.ecb.europa.eu/press/key/date/2026/html/ecb.sp260828~fe9afc86e8.en.html",n:"The most rigorous statement of the elastic-liquidity argument against stablecoins as a settlement asset. Read first and read closely."},
+   {id:"s1b",t:"The Eurosystem's comprehensive payments strategy",pub:"European Central Bank",d:"31 Mar 2026",k:"primary",u:"https://www.ecb.europa.eu/press/pubbydate/2026/html/ecb.eurosystemcomprehensivepaymentsstrategy202603.en.html",n:"Places Pontes, Appia and the digital euro inside one four-pillar strategy: monetary anchor, strategic autonomy, market integration, international role of the euro."},
+   {id:"s1c",t:"The role of the Eurosystem in the scaling-up of a tokenised financial system",pub:"ECB Financial Integration and Structure report",d:"May 2026",k:"analysis",u:"https://www.ecb.europa.eu/press/fie/box/html/ecb.fiebox202605_05.en.html",n:"Short and analytical. The market-structure argument in its most compact form."}
+  ]},
+
+ {id:"m2", n:"II", label:"Prehistory: the trials",
+  title:"Prehistory: the exploratory work, 2023 to 2024",
+  brief:"Pontes did not begin as a design. It began as a comparative experiment. Between May and November 2024 the Eurosystem ran <strong>3 competing solutions in parallel</strong>: the Banque de France full-DLT platform (DL3S), the Banca d'Italia TIPS Hash-Link interoperability gateway, and the Deutsche Bundesbank Trigger Solution bridging T2 to market DLT. 64 participants across 9 jurisdictions completed 58 use cases and settled close to 1.6 billion euro in central bank money. Understanding why the Hash-Link approach prevailed is the single most important technical point in this course.",
+  sources:[
+   {id:"s2a",t:"Exploratory work on new technologies for wholesale central bank money settlement",pub:"ECB programme page",d:"2023 onwards",k:"primary",u:"https://www.ecb.europa.eu/paym/dlt/exploratory/html/index.en.html",n:"Gateway to the call for participation, the three solution descriptions and the trial waves."},
+   {id:"s2b",t:"The Eurosystem's exploratory work on new technologies for wholesale central bank money settlement",pub:"European Central Bank",d:"1 Jul 2025",k:"primary",u:"https://www.ecb.europa.eu/press/pubbydate/2025/html/ecb.exploratoryworknewtechnologies202506.en.html",n:"The core empirical document. The sections on atomicity, escrow mechanics and the allocation of operational responsibility are the ones that reappear verbatim in the Pontes design."},
+   {id:"s2c",t:"Report PDF (full text)",pub:"European Central Bank",d:"Jun 2025",k:"primary",u:"https://www.ecb.europa.eu/pub/pdf/other/ecb.exploratoryworknewtechnologies202506.en.pdf",n:"Same report, printable."},
+   {id:"s2d",t:"New technologies for wholesale central bank money settlement",pub:"ECB Operations Managers Group briefing",d:"21 Mar 2024",k:"analysis",u:"https://www.ecb.europa.eu/paym/groups/pdf/omg/2024/240321/Item_4_New_technologies_for_wholesale_central_bank_money_settlement.pdf",n:"A contemporaneous view of the trials while they were still running, before the conclusions hardened."}
+  ]},
+
+ {id:"m3", n:"III", label:"The dual-track decision",
+  title:"The decision: dual-track, 1 July 2025",
+  brief:"On 1 July 2025 the Governing Council split the work in two. <strong>Pontes</strong> is the short-track production offering, to be piloted by end-Q3 2026. <strong>Appia</strong> is the long-track architectural enquiry, to deliver a blueprint in 2028. Read the press release together with the market contact group mandate published two weeks later: the mandate tells you who the Eurosystem thought its counterparties were, which is a more candid document than the announcement.",
+  sources:[
+   {id:"s3a",t:"ECB commits to distributed ledger technology settlement plans with dual-track strategy",pub:"ECB press release",d:"1 Jul 2025",k:"primary",u:"https://www.ecb.europa.eu/press/pr/date/2025/html/ecb.pr250701~f4a98dd9dc.en.html",n:"The founding instrument. Short, dense, worth annotating line by line."},
+   {id:"s3b",t:"Mandate of the Pontes market contact group",pub:"European Central Bank",d:"Jul 2025",k:"primary",u:"https://www.ecb.europa.eu/press/intro/news/html/ecb.mipnews250715_annex1.en.pdf",n:"Composition, remit and the limits of what the market was invited to advise on."},
+   {id:"s3c",t:"Pontes and Appia",pub:"ECB Bond Market Contact Group",d:"4 Mar 2026",k:"analysis",u:"https://www.ecb.europa.eu/paym/groups/pdf/bmcg/260304/Item_3d_Pontes_and_Appia_ECB.pdf",n:"The clearest single deck on how the two tracks relate. Use it as the map for everything that follows."}
+  ]},
+
+ {id:"m4", n:"IV", label:"Pontes: architecture",
+  title:"Pontes: architecture, eligibility and pricing",
+  brief:"The technical and operational core. Five design features matter: a single consolidated Eurosystem offering; a <strong>dual settlement model</strong> using either cash tokens or the T2 RTGS system; <strong>finality achieved in T2 in every case</strong>, so central bank money certainty is never delegated to a market ledger; the <strong>Hash-Link protocol</strong> delivering delivery-versus-payment and all-or-none settlement; and end-to-end automation. Pay particular attention to the eligibility perimeter. It determines which of your clients can touch this at all, and which need a licensed intermediary to reach it.",
+  callout:{h:"Compliance reading",p:"Cross-read the eligibility paper against your own client book before you go further. Every entity inside the perimeter is already a supervised obliged entity. That is a deliberate design choice, and it is what pushes the interesting AML risk out to the edges rather than into the settlement layer."},
+  sources:[
+   {id:"s4a",t:"Pontes",pub:"ECB programme page",d:"live",k:"primary",u:"https://www.ecb.europa.eu/paym/target/pontes/html/index.en.html",n:"The canonical entry point. Bookmark it; it is updated as the service evolves."},
+   {id:"s4b",t:"Pontes Pilot: Business Description Document, final version 1.0",pub:"European Central Bank",d:"20 Feb 2026",k:"primary",u:"https://www.ecb.europa.eu/paym/target/target-professional-use-documents-links/pontes/shared/pdf/ecb.pontes260220_bdd.en.pdf",n:"The specification. Read it in full: this is the document a practitioner in this field is assumed to have read."},
+   {id:"s4c",t:"Pontes market contact group: ad-hoc discussion on eligibility",pub:"European Central Bank",d:"28 Jan 2026",k:"primary",aml:true,u:"https://www.ecb.europa.eu/paym/target/pontes/governance/pdf/pmcg/ecb.pmcg260128_adhoceligibility.en.pdf",n:"Sets the two access categories: T2-eligible market participants under Article 4 and Annex 1 Part I of the TARGET Guideline, and market DLT operators (CSDs, DLT settlement system operators, EU or EEA payment system operators, CCPs, credit institutions, investment firms and other supervised financial institutions)."},
+   {id:"s4d",t:"Pontes Pilot: testing and onboarding strategy",pub:"European Central Bank",d:"27 Feb 2026",k:"primary",u:"https://www.ecb.europa.eu/paym/target/target-professional-use-documents-links/pontes/shared/pdf/ecb.pontes260227_testingstrategy.en.pdf",n:"How an institution actually gets on. Relevant if a client asks you to run the onboarding."},
+   {id:"s4e",t:"Pontes initial launch pricing guide",pub:"European Central Bank",d:"19 Aug 2026",k:"primary",u:"https://www.ecb.europa.eu/paym/target/target-professional-use-documents-links/pontes/shared/pdf/ecb.pontes.20260819.PontesInitialLaunchPricingGuide.en.pdf.pdf",n:"One-off connection fees only in the initial launch phase: 2,500 euro for market participants, 15,000 euro for market DLT operators. No monthly or settlement fees until the enhanced product phase from 2028."},
+   {id:"s4f",t:"Pontes documents and links (professional use)",pub:"European Central Bank",d:"live",k:"primary",u:"https://www.ecb.europa.eu/paym/target/target-professional-use-documents-links/pontes-documents-links/html/index.en.html",n:"Where subsequent specification versions will appear. Check it before relying on any version above."}
+  ]},
+
+ {id:"m5", n:"V", label:"Delivery to go-live",
+  title:"Delivery: October 2025 to September 2026",
+  brief:"Follow the delivery record through the governance papers rather than through commentary. The market contact group met on 21 October 2025, 11 December 2025 and 26 February 2026, with an ad-hoc eligibility session on 28 January 2026. Registration for the first go-live cohort closed on <strong>7 August 2026</strong>, user testing ran through August 2026, and the service is expected in production later this month. By mid-2028 the Eurosystem intends 24/7 operation, immediate settlement finality and multi-currency capability.",
+  sources:[
+   {id:"s5a",t:"Pontes governance",pub:"European Central Bank",d:"live",k:"primary",u:"https://www.ecb.europa.eu/paym/target/pontes/governance/html/index.en.html",n:"Market Infrastructure Board, Pontes working group and market contact group, with mandates and composition."},
+   {id:"s5b",t:"Outcome of the 1st Pontes market contact group meeting",pub:"European Central Bank",d:"21 Oct 2025",k:"primary",u:"https://www.ecb.europa.eu/paym/target/pontes/governance/pdf/pmcg/ecb.pmcg251021_outome.en.pdf",n:"First contact with the market after the July 2025 decision."},
+   {id:"s5c",t:"2nd Pontes market contact group: presentations",pub:"European Central Bank",d:"11 Dec 2025",k:"primary",u:"https://www.ecb.europa.eu/paym/target/pontes/governance/pdf/pmcg/ecb.pmcg251211_presentations.en.pdf",n:"Contains the overall delivery roadmap and the draft Business Description Document."},
+   {id:"s5d",t:"3rd Pontes market contact group: presentations",pub:"European Central Bank",d:"26 Feb 2026",k:"primary",u:"https://www.ecb.europa.eu/paym/target/pontes/governance/pdf/pmcg/ecb.pmcg260226_presentations.en.pdf",n:"The point at which the design stops moving and testing begins."},
+   {id:"s5e",t:"Focus session: preparing the go-live of Pontes",pub:"European Central Bank",d:"22 Jul 2026",k:"primary",u:"https://www.ecb.europa.eu/press/intro/events/html/fs_20260722.en.html",n:"Timeline, use cases, milestones, user testing, and a dedicated session on the operational and legal framework."},
+   {id:"s5f",t:"Eurosystem selects members for the Appia contact group",pub:"European Central Bank",d:"19 Aug 2026",k:"primary",u:"https://www.ecb.europa.eu/press/intro/news/html/ecb.mipnews260819.en.html",n:"61 stakeholders selected after a call issued 1 June 2026. The group starts in September 2026 and replaces both the Pontes market contact group and the New Technologies for Wholesale settlement contact group."},
+   {id:"s5g",t:"From vision to delivery: building Europe's tokenised financial market",pub:"Piero Cipollone, Deutsche Bundesbank symposium",d:"26 Aug 2026",k:"primary",u:"https://www.ecb.europa.eu/press/key/date/2026/html/ecb.sp260826~3641116314.en.html",n:"The most current authoritative statement of where delivery stands, including the three stated conditions for success: common standards, public-private partnership, and an integrated legal framework."},
+   {id:"s5h",t:"ECB targets 21 September go live for Project Pontes",pub:"Ledger Insights (trade press)",d:"4 Aug 2026",k:"trade",u:"https://www.ledgerinsights.com/ecb-targets-21-september-go-live-for-project-pontes-a-primer-on-tokenized-central-bank-money/",n:"The only source in this course that is not institutional. It is where the 21 September date comes from. Useful, not authoritative."}
+  ]},
+
+ {id:"m6", n:"VI", label:"Appia: the 2028 blueprint",
+  title:"Appia: the 2028 blueprint",
+  brief:"Appia is not a system, it is an enquiry. Its four open questions are whether settlement should sit on <strong>1 shared network or on several interoperable ones</strong>, how governance and control should be allocated, what standards and interoperability mechanisms are required, and how monetary policy operations would function on DLT. The answers will shape European market infrastructure for a decade, which is why the consultation record matters more than the press release.",
+  callout:{h:"The question that decides your practice",p:"A single shared network concentrates governance, supervision and travel-rule propagation in one rule-book. Multiple interoperable networks push all three onto the crossing points. Whichever way Appia lands, the AML architecture of European tokenised markets follows from it."},
+  sources:[
+   {id:"s6a",t:"Appia: paving the way for a future-ready, integrated financial ecosystem leveraging tokenisation and DLT",pub:"European Central Bank",d:"11 Mar 2026",k:"primary",u:"https://www.ecb.europa.eu/press/payments-news/ecb.pubconpm202603.en.html",n:"The roadmap document itself. Read the four questions before reading anyone's answers to them."},
+   {id:"s6b",t:"Appia roadmap PDF",pub:"European Central Bank",d:"Mar 2026",k:"primary",u:"https://www.ecb.europa.eu/press/payments-news/ecb.pubconpm202603.en.pdf",n:"Printable version."},
+   {id:"s6c",t:"Eurosystem unveils Appia roadmap for Europe's tokenised finance",pub:"ECB press release",d:"11 Mar 2026",k:"primary",u:"https://www.ecb.europa.eu/press/pr/date/2026/html/ecb.pr260311~14ddf51a77.en.html",n:"Cipollone: with Appia the Eurosystem is building a road from today's financial system to tomorrow's tokenised markets. The blueprint is targeted for 2028."},
+   {id:"s6d",t:"Appia",pub:"ECB programme page",d:"live",k:"primary",u:"https://www.ecb.europa.eu/paym/dlt/appia/html/index.en.html",n:"Programme home, updated as workstreams report."},
+   {id:"s6e",t:"Public consultation on the Eurosystem's Appia project",pub:"European Central Bank",d:"Mar 2026",k:"primary",u:"https://www.ecb.europa.eu/press/intro/cons/html/eurosystem-appia-project.en.html",n:"126 respondents across the financial services sector. The feedback summary is due in the second half of 2026."},
+   {id:"s6f",t:"A highway for the future of Europe's digital finance",pub:"The ECB Blog",d:"12 Mar 2026",k:"analysis",u:"https://www.ecb.europa.eu/press/blog/date/2026/html/ecb.blog20260312~5dfa697fdd.en.html",n:"The accessible companion to the roadmap. Good for briefing a non-specialist client."}
+  ]},
+
+ {id:"m7", n:"VII", label:"The EU legal framework",
+  title:"The surrounding EU legal framework",
+  brief:"Pontes settles instruments that exist because of other legislation. You cannot advise on it without holding the following in working memory. Note especially the unresolved interaction between <strong>settlement finality under Directive 98/26/EC</strong> and finality on a distributed ledger. The Eurosystem's answer is to keep final settlement in T2, which is a legal design choice at least as much as a technical one.",
+  sources:[
+   {id:"s7a",t:"Guideline (EU) 2022/912 (TARGET Guideline, ECB/2022/8)",pub:"EUR-Lex",d:"24 Feb 2022",k:"legal",u:"https://eur-lex.europa.eu/eli/guideline/2022/912/oj",n:"Article 4 and Annex 1 Part I define the access perimeter that Pontes inherits wholesale."},
+   {id:"s7b",t:"Regulation (EU) 2022/858 (DLT Pilot Regime)",pub:"EUR-Lex",d:"30 May 2022",k:"legal",u:"https://eur-lex.europa.eu/eli/reg/2022/858/oj",n:"The authorisation route for the DLT market infrastructures sitting on the other side of the Pontes link."},
+   {id:"s7c",t:"ESMA report on the functioning and review of the DLT Pilot Regime (Article 14)",pub:"ESMA",d:"25 Jun 2025",k:"legal",u:"https://www.esma.europa.eu/sites/default/files/2025-06/ESMA75-117376770-460_Report_on_the_functioning_and_review_of_the_DLTR_-_Art.14.pdf",n:"ESMA recommends making the regime permanent and recalibrating thresholds and eligible-asset definitions to the risk of individual business models."},
+   {id:"s7d",t:"ESMA suggests amendments to the DLT Pilot Regime",pub:"ESMA news",d:"25 Jun 2025",k:"legal",u:"https://www.esma.europa.eu/press-news/esma-news/esma-suggests-amendments-dlt-pilot-regime-make-it-permanent",n:"The short statement, if you need the position without the report."},
+   {id:"s7e",t:"Directive 98/26/EC (Settlement Finality Directive)",pub:"EUR-Lex",d:"19 May 1998",k:"legal",u:"https://eur-lex.europa.eu/eli/dir/1998/26/oj",n:"Protection attaches to designated systems. A market DLT ledger is not one, which is why finality stays in T2."},
+   {id:"s7f",t:"Regulation (EU) No 909/2014 (CSDR)",pub:"EUR-Lex",d:"23 Jul 2014",k:"legal",u:"https://eur-lex.europa.eu/eli/reg/2014/909/oj",n:"The CSD side of the securities leg."},
+   {id:"s7g",t:"Regulation (EU) 2023/1114 (MiCA)",pub:"EUR-Lex",d:"31 May 2023",k:"legal",aml:true,u:"https://eur-lex.europa.eu/eli/reg/2023/1114/oj",n:"Governs the private settlement assets, principally e-money tokens, that Pontes is intended to sit alongside rather than displace."}
+  ]},
+
+ {id:"m8", n:"VIII", label:"The AML and CFT layer",
+  title:"The AML and CFT layer",
+  brief:"This is where the course earns its keep for compliance practice. Pontes is deliberately built so that the settlement leg never leaves supervised hands: participants are T2-eligible institutions and licensed market DLT operators, and finality occurs in T2. The regulatory risk therefore sits <strong>not in the settlement layer but at its boundary</strong>: in the asset leg, in the identity of the ultimate beneficiary, and in the onward movement of tokens across networks Appia may one day interconnect. Hold three questions throughout: who is the obliged entity at each hop; does a hash-linked atomic settlement create one transfer or two for travel-rule purposes; and how is due diligence discharged when the counterparty is a smart contract address.",
+  callout:{h:"Practical exercise",p:"Take a single delivery-versus-payment transaction between a DLT Pilot Regime settlement system and a T2 participant, settled through Pontes Hash-Link, and map every obliged entity, every travel-rule data element and every point at which a suspicious transaction report could arise. Then repeat the exercise assuming the securities leg sits on a permissionless network. The difference between the two maps is the substance of the Appia governance debate."},
+  sources:[
+   {id:"s8a",t:"Regulation (EU) 2024/1624 (AMLR)",pub:"EUR-Lex",d:"31 May 2024",k:"legal",aml:true,u:"https://eur-lex.europa.eu/eli/reg/2024/1624/oj",n:"Applies from 10 July 2027. The single rulebook. Read the obliged-entity definitions and the customer due diligence chapter directly against the Pontes participant list from Module IV."},
+   {id:"s8b",t:"Directive (EU) 2024/1640 (AMLD6)",pub:"EUR-Lex",d:"31 May 2024",k:"legal",aml:true,u:"https://eur-lex.europa.eu/eli/dir/2024/1640/oj",n:"Supervision, FIUs, registers. The institutional half of the package."},
+   {id:"s8c",t:"Regulation (EU) 2024/1620 (AMLA Regulation)",pub:"EUR-Lex",d:"31 May 2024",k:"legal",aml:true,u:"https://eur-lex.europa.eu/eli/reg/2024/1620/oj",n:"AMLA's direct supervision perimeter is being populated now, and it will capture cross-border crypto-asset service providers before it captures most other categories."},
+   {id:"s8d",t:"Regulation (EU) 2023/1113 (Transfer of Funds Regulation, travel rule)",pub:"EUR-Lex",d:"31 May 2023",k:"legal",aml:true,u:"https://eur-lex.europa.eu/eli/reg/2023/1113/oj",n:"The instrument that determines what information must accompany a tokenised transfer, and between whom."},
+   {id:"s8e",t:"EBA Guidelines on the travel rule",pub:"European Banking Authority",d:"4 Jul 2024",k:"legal",aml:true,u:"https://www.eba.europa.eu/sites/default/files/2024-07/6de6e9b9-0ed9-49cd-985d-c0834b5b4356/Travel%20Rule%20Guidelines.pdf",n:"Applicable from 30 December 2024. The operational detail on detecting and handling missing or incomplete information."},
+   {id:"s8f",t:"EBA announcement on the travel rule guidelines",pub:"European Banking Authority",d:"4 Jul 2024",k:"legal",aml:true,u:"https://www.eba.europa.eu/publications-and-media/press-releases/eba-issues-travel-rule-guidance-tackle-money-laundering-and-terrorist-financing-transfers-funds-and",n:"Context and scope, if you need the summary before the guidelines."},
+   {id:"s8g",t:"The FATF Recommendations",pub:"Financial Action Task Force",d:"as amended",k:"legal",aml:true,u:"https://www.fatf-gafi.org/en/publications/Fatfrecommendations/Fatf-recommendations.html",n:"Recommendations 15 and 16 in particular, as the international baseline against which the EU instruments above are calibrated."},
+   {id:"s8h",t:"FATF updates Standards on Recommendation 16 on payment transparency",pub:"Financial Action Task Force",d:"Jun 2025",k:"legal",aml:true,u:"https://www.fatf-gafi.org/en/publications/Fatfrecommendations/update-Recommendation-16-payment-transparency-june-2025.html",n:"The most recent movement in the international payment-transparency standard. Read it against the TFR."}
+  ]},
+
+ {id:"m9", n:"IX", label:"Comparative context",
+  title:"Comparative context: the Swiss road not taken",
+  brief:"One comparator is worth the time. Switzerland reached the same problem first and answered it differently. Under Project Helvetia the SNB settles tokenised assets in <strong>real Swiss franc wholesale central bank money issued onto the market ledger itself</strong>, rather than bridging to the RTGS system and keeping finality there. That is precisely the design choice the Eurosystem declined to make in Pontes, and deferred to Appia. Holding the two side by side is the fastest way to see what the Eurosystem is actually optimising for.",
+  sources:[
+   {id:"s9a",t:"Project Helvetia",pub:"Swiss National Bank",d:"live",k:"primary",u:"https://www.snb.ch/en/the-snb/mandates-goals/payment-transactions/projekt_helvetia",n:"The SNB's own programme page across all phases."},
+   {id:"s9b",t:"Project Helvetia: a multi-phase investigation on the settlement of tokenised assets in central bank money",pub:"BIS Innovation Hub",d:"live",k:"analysis",u:"https://www.bis.org/about/bisih/topics/cbdc/helvetia.htm",n:"Phases I and II with the BIS; Phase III piloted live Swiss franc wholesale central bank money from 1 December 2023, run by the SNB alone."},
+   {id:"s9c",t:"Swiss National Bank extends and expands Project Helvetia",pub:"Swiss National Bank press release",d:"30 Jun 2025",k:"primary",u:"https://www.snb.ch/en/publications/communication/press-releases/2025/pre_20250630",n:"The extension and broadening of the pilot, one day before the Eurosystem announced its own dual track."}
+  ]}
+];
+
+const TIMELINE = [
+ {d:"Oct 2023",lane:"e",t:"Eurosystem surveys national central banks on planned trials and experiments",n:"The programme is scoped before any solution is chosen."},
+ {d:"Mar 2024",lane:"e",t:"Operations Managers Group briefed on the three candidate solutions",n:"DL3S, TIPS Hash-Link and the Trigger Solution described side by side."},
+ {d:"May 2024",lane:"e",t:"Trials and experiments begin",n:"Running to November 2024: 64 participants, 9 jurisdictions, 58 use cases, close to 1.6 billion euro settled."},
+ {d:"Jul 2024",lane:"l",t:"EBA Guidelines on the travel rule published",n:"Applicable from 30 December 2024."},
+ {d:"1 Jul 2025",lane:"e",t:"Governing Council adopts the dual-track strategy",n:"Pontes for the short track, Appia for the long track. The exploratory work report is published the same day."},
+ {d:"25 Jun 2025",lane:"l",t:"ESMA Article 14 report on the DLT Pilot Regime",n:"Recommends making the regime permanent and recalibrating thresholds."},
+ {d:"30 Jun 2025",lane:"l",t:"SNB extends and expands Project Helvetia",n:"The Swiss comparator moves in the opposite architectural direction."},
+ {d:"Jul 2025",lane:"e",t:"Pontes market contact group mandated",n:"Call for expressions of interest issued."},
+ {d:"21 Oct 2025",lane:"e",t:"1st Pontes market contact group meeting"},
+ {d:"11 Dec 2025",lane:"e",t:"2nd meeting: overall roadmap and draft Business Description Document"},
+ {d:"28 Jan 2026",lane:"e",t:"Ad-hoc session fixes the eligibility perimeter",n:"Two access categories: T2-eligible participants, and licensed market DLT operators."},
+ {d:"20 Feb 2026",lane:"e",t:"Business Description Document final version 1.0"},
+ {d:"26 Feb 2026",lane:"e",t:"3rd market contact group meeting and testing and onboarding strategy"},
+ {d:"4 Mar 2026",lane:"e",t:"Bond Market Contact Group briefed on Pontes and Appia"},
+ {d:"11 Mar 2026",lane:"e",t:"Appia roadmap published and consultation opened",n:"126 respondents; blueprint targeted for 2028."},
+ {d:"31 Mar 2026",lane:"e",t:"Eurosystem comprehensive payments strategy",n:"Pontes, Appia and the digital euro placed inside one four-pillar frame."},
+ {d:"1 Jun 2026",lane:"e",t:"Call for expressions of interest, Appia contact group"},
+ {d:"22 Jul 2026",lane:"e",t:"Focus session: preparing the go-live of Pontes",n:"Timeline, use cases, user testing, operational and legal framework."},
+ {d:"7 Aug 2026",lane:"e",t:"Registration closes for the first go-live cohort",n:"Institutions register for the production environment with their national central bank."},
+ {d:"Aug 2026",lane:"e",t:"User testing"},
+ {d:"19 Aug 2026",lane:"e",t:"Pricing guide published; 61 members named to the Appia contact group",n:"The new group starts in September 2026 and replaces the Pontes market contact group."},
+ {d:"26 Aug 2026",lane:"e",t:"Cipollone: from vision to delivery",n:"Three stated conditions for success: common standards, public-private partnership, an integrated legal framework."},
+ {d:"28 Aug 2026",lane:"e",t:"Schnabel at Jackson Hole: central banks on-chain"},
+ {d:"21 Sep 2026",lane:"e",future:true,t:"Expected Pontes go-live",n:"Reported by trade press and consistent with the published testing timetable. No ECB press release confirms this date."},
+ {d:"10 Jul 2027",lane:"l",future:true,t:"AMLR (Regulation (EU) 2024/1624) applies",n:"The single rulebook takes effect roughly nine months after Pontes enters production."},
+ {d:"2028",lane:"e",future:true,t:"Pontes enhanced product; Appia blueprint",n:"24/7 operation, immediate settlement finality and multi-currency capability by mid-2028; the Appia blueprint the same year."}
+];
+
+const QUESTIONS = [
+ {q:"Why did the Eurosystem consolidate three tested solutions into one offering, and what was lost in doing so?",
+  a:"A strong answer names the June 2025 report's recommendation of a single consolidated short-term offering covering both securities and payments use cases; explains that the Hash-Link interoperability model was carried forward because it delivers atomic delivery-versus-payment while leaving legal finality in T2; and identifies what was deferred rather than abandoned, namely the full-DLT model in which central bank money exists as tokens on a Eurosystem-operated ledger. That question is now Appia's, not Pontes'."},
+ {q:"Why is final settlement retained in T2 rather than on the market ledger, and what does that mean for settlement finality under Directive 98/26/EC?",
+  a:"The Directive protects transfer orders entered into a designated system. A market DLT platform is not a designated system, so finality achieved on it would not carry the same insolvency protection. Keeping the final leg in T2 means the Eurosystem is not asking the legislator to extend finality to distributed ledgers before the technology has settled. Note the consequence: atomicity across the two legs is achieved by the hash-link making the asset leg conditional, not by relocating finality."},
+ {q:"Which of your clients fall inside the Pontes eligibility perimeter, and which would need a licensed intermediary to reach it?",
+  a:"Two categories only: entities with T2 access under Article 4 and Annex 1 Part I of the TARGET Guideline, and market DLT operators, meaning CSDs, DLT settlement system operators, EU or EEA payment system operators, CCPs, credit institutions, investment firms and other supervised financial institutions. An unlicensed token issuer, a fund, or a corporate treasury reaches Pontes only through one of these. That is the answer to most client questions about access."},
+ {q:"Where in a hash-linked atomic settlement does the travel-rule obligation attach, and to whom?",
+  a:"Separate the legs. The cash leg is a transfer between T2 participants, so ordinary payment transparency duties under Regulation (EU) 2023/1113 apply between their payment service providers. The asset leg depends on what the token is and who operates the ledger. The unresolved question, and the one worth arguing, is whether a hash-linked all-or-none settlement is one composite transfer or two, because that determines how many sets of originator and beneficiary information must travel and who is responsible for detecting that they are missing."},
+ {q:"What would change, for AML purposes, if Appia concludes in favour of a single shared network rather than multiple interoperable ones?",
+  a:"A single network concentrates governance, rule-making and supervisory leverage in one place, and makes information propagation with the token a design property rather than a negotiation. Multiple interoperable networks move the entire AML question onto the crossing points, where the risk is that identity data does not survive the hop and no single entity is responsible for noticing. Concentration risk and single points of failure run the other way. The honest answer sets out the trade-off rather than picking a side."},
+ {q:"How does the Eurosystem treat stablecoins as a settlement asset as against a payment instrument, and is that distinction stable?",
+  a:"As a settlement asset the Eurosystem rejects them: Schnabel's argument is that only a central bank can expand liquidity elastically in stress, so only central bank money is safe at the core. As a payment instrument they are accommodated: e-money tokens are regulated under MiCA and the payments strategy expressly contemplates private settlement assets operating in parallel. The distinction holds only so long as stablecoin use does not migrate into wholesale settlement by weight of adoption, which is the scenario the Eurosystem is racing to pre-empt."}
+];
+
+const GLOSSARY = [
+ {t:"Wholesale central bank money",d:"Central bank liabilities held by financial institutions, as against the retail cash and deposits held by the public. Pontes is a wholesale project. The digital euro is the retail one."},
+ {t:"T2",d:"The Eurosystem's real-time gross settlement system for large-value euro payments, part of TARGET Services. Pontes achieves final settlement here in every settlement model."},
+ {t:"TARGET Services",d:"The Eurosystem's family of market infrastructure services, governed by Guideline (EU) 2022/912. Its Article 4 and Annex 1 Part I define who may participate, and therefore who may reach Pontes."},
+ {t:"Hash-Link",d:"The protocol Pontes uses to bind the cash leg in T2 to the asset leg on a market DLT platform, so that either both settle or neither does. Developed from the Banca d'Italia TIPS Hash-Link solution tested in 2024."},
+ {t:"Atomic settlement",d:"Settlement in which linked legs succeed or fail together, leaving no window in which one party has delivered and the other has not."},
+ {t:"Delivery-versus-payment (DvP)",d:"The securities-market form of atomicity: the securities leg settles if and only if the cash leg does."},
+ {t:"DL3S",d:"The Banque de France full-DLT solution tested in 2024, in which central bank money exists as cash tokens on a Eurosystem-operated distributed ledger. Not the model Pontes adopted; the question it poses is Appia's."},
+ {t:"Trigger Solution",d:"The Deutsche Bundesbank solution tested in 2024, a technical bridge instructing T2 from a market DLT platform."},
+ {t:"Two-tier monetary system",d:"The arrangement in which central bank money anchors commercial bank money, and the two exchange at par. The Eurosystem's stated reason for keeping central bank money at the core of tokenised settlement."},
+ {t:"Singleness of money",d:"The property that a euro is a euro whoever issues the claim. Fragmentation across incompatible private settlement assets is the risk the Eurosystem invokes against it."},
+ {t:"Obliged entity",d:"An entity subject to AML and CFT duties under the EU framework, now consolidated in Regulation (EU) 2024/1624. Every Pontes participant is one already, which is why the settlement layer is not where the AML risk sits."},
+ {t:"Travel rule",d:"The requirement, in the EU under Regulation (EU) 2023/1113, that specified originator and beneficiary information accompany a transfer of funds or crypto-assets, and that the receiving institution detect when it is missing."},
+ {t:"DLT Pilot Regime",d:"Regulation (EU) 2022/858, a time-limited framework allowing DLT market infrastructures to operate under targeted exemptions from CSDR and MiFID. ESMA has recommended making it permanent."},
+ {t:"Settlement finality",d:"The point at which a transfer order becomes legally irrevocable and insolvency-proof. Protected under Directive 98/26/EC for designated systems, which a market DLT ledger is not."}
+];
+
+/* ============================ STATE ============================ */
+const ALL_SOURCES = MODULES.flatMap(m => m.sources.map(s => s.id));
+let state = {read:{}, flipped:{}, ts:0};
+let store = null;          // db doc reference, or null
+let writeTimer = null;
+let current = 0;
+let amlOnly = false;
+let view = "course";
+
+const LS_KEY = "pontes-appia-progress-v1";
+
+function loadLocal(){
+  try{ const raw = localStorage.getItem(LS_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  return null;
+}
+function saveLocal(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){}
+}
+function pushRemote(){
+  if(!store) return;
+  const payload = {read:state.read, flipped:state.flipped, ts:state.ts};
+  store.set(payload).catch(()=>{});
+}
+function persist(){
+  state.ts = Date.now();
+  saveLocal();
+  if(store){
+    clearTimeout(writeTimer);
+    writeTimer = setTimeout(pushRemote, 300);
+  }
+}
+
+function initStore(){ /* standalone build: progress is stored in the reader's browser */ }
+
+/* ============================ RENDER ============================ */
+const el = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+function moduleDone(m){ return m.sources.every(s => state.read[s.id]); }
+
+function renderProgress(){
+  const total = ALL_SOURCES.length;
+  const done = ALL_SOURCES.filter(id => state.read[id]).length;
+  el("roadFill").style.width = (total ? (done/total*100) : 0) + "%";
+  el("roadCount").textContent = done + " / " + total + " read";
+  const track = el("roadTrack");
+  track.querySelectorAll(".road-mile").forEach(n => n.remove());
+  let acc = 0;
+  MODULES.forEach((m, i) => {
+    acc += m.sources.length;
+    const pct = acc/total*100;
+    const tick = document.createElement("div");
+    tick.className = "road-mile" + (moduleDone(m) ? " hit" : "");
+    tick.style.left = pct + "%";
+    tick.title = "Module " + m.n;
+    track.appendChild(tick);
+  });
+}
+
+function renderRail(){
+  const rail = el("rail");
+  rail.innerHTML = "";
+  MODULES.forEach((m, i) => {
+    const b = document.createElement("button");
+    b.className = "mile" + (moduleDone(m) ? " done" : "");
+    b.setAttribute("aria-current", i === current ? "true" : "false");
+    b.innerHTML = '<span class="stone">' + m.n + '</span><span class="lbl">' + esc(m.label) + '</span>';
+    b.addEventListener("click", () => { current = i; renderModule(); renderRail(); window.scrollTo({top:0,behavior:"smooth"}); });
+    rail.appendChild(b);
+  });
+}
+
+function kindLabel(k){
+  return k === "primary" ? "Primary" : k === "legal" ? "Legal text" : k === "trade" ? "Trade press" : "Analysis";
+}
+
+function renderModule(){
+  const m = MODULES[current];
+  const pane = el("modulePane");
+  const shown = m.sources.filter(s => !amlOnly || s.aml);
+  let html = "";
+  html += '<div class="eyebrow">Module ' + m.n + ' of IX</div>';
+  html += '<h2 class="mod-title">' + esc(m.title) + '</h2>';
+  html += '<p class="brief">' + m.brief + '</p>';
+  html += '<div class="toolbar"><h3>Reading list</h3>' +
+          '<button class="chip" id="amlChip" aria-pressed="' + amlOnly + '">AML-critical only</button>' +
+          '<span style="font-family:var(--mono);font-size:11.5px;color:var(--ink-3)">' +
+            m.sources.filter(s=>state.read[s.id]).length + ' of ' + m.sources.length + ' read</span></div>';
+  html += '<div class="sources">';
+  if(shown.length === 0){
+    html += '<p style="color:var(--ink-3);font-size:15px">No AML-critical sources in this module. Turn the filter off to see the full list.</p>';
+  }
+  shown.forEach(s => {
+    const isRead = !!state.read[s.id];
+    html += '<div class="src' + (isRead ? " read" : "") + (s.aml ? " amlhit" : "") + '">' +
+      '<button class="tick" data-src="' + s.id + '" aria-pressed="' + isRead + '" aria-label="Mark as read">&#10003;</button>' +
+      '<div>' +
+        '<div class="src-t"><a href="' + s.u + '" target="_blank" rel="noopener">' + esc(s.t) + '</a></div>' +
+        '<div class="src-m"><span class="badge ' + s.k + '">' + kindLabel(s.k) + '</span>' +
+          (s.aml ? '<span class="badge aml">AML</span>' : '') +
+          '<span>' + esc(s.pub) + '</span><span>' + esc(s.d) + '</span></div>' +
+        '<div class="src-n">' + esc(s.n) + '</div>' +
+      '</div></div>';
+  });
+  html += '</div>';
+  if(m.callout){
+    html += '<div class="callout"><h4>' + esc(m.callout.h) + '</h4><p>' + esc(m.callout.p) + '</p></div>';
+  }
+  html += '<div class="modnav">' +
+    '<button id="prevBtn"' + (current === 0 ? " disabled" : "") + '>&#8592; ' + (current === 0 ? "Start of course" : esc(MODULES[current-1].label)) + '</button>' +
+    '<button id="nextBtn"' + (current === MODULES.length-1 ? " disabled" : "") + '>' + (current === MODULES.length-1 ? "End of course" : esc(MODULES[current+1].label)) + ' &#8594;</button>' +
+    '</div>';
+  pane.innerHTML = html;
+
+  pane.querySelectorAll(".tick").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.src;
+      if(state.read[id]) delete state.read[id]; else state.read[id] = true;
+      persist(); renderAll();
+    });
+  });
+  const chip = el("amlChip");
+  if(chip) chip.addEventListener("click", () => { amlOnly = !amlOnly; renderModule(); });
+  const prev = el("prevBtn"), next = el("nextBtn");
+  if(prev) prev.addEventListener("click", () => { if(current>0){ current--; renderModule(); renderRail(); window.scrollTo({top:0,behavior:"smooth"}); }});
+  if(next) next.addEventListener("click", () => { if(current<MODULES.length-1){ current++; renderModule(); renderRail(); window.scrollTo({top:0,behavior:"smooth"}); }});
+}
+
+function renderTimeline(){
+  const c = el("tl");
+  c.innerHTML = TIMELINE.map(e =>
+    '<div class="ev lane-' + e.lane + (e.future ? " future" : "") + '">' +
+      '<div class="ev-d">' + esc(e.d) + '</div>' +
+      '<div class="ev-b"><div class="ev-t">' + esc(e.t) + '</div>' +
+      (e.n ? '<div class="ev-n">' + esc(e.n) + '</div>' : '') + '</div>' +
+    '</div>').join("");
+}
+
+function renderAssess(){
+  const g = el("qgrid");
+  g.innerHTML = QUESTIONS.map((q, i) => {
+    const open = !!state.flipped["q"+i];
+    return '<div class="q">' +
+      '<div class="q-n">Question ' + (i+1) + '</div>' +
+      '<div class="q-t">' + esc(q.q) + '</div>' +
+      (open ? '<div class="q-a"><h5>A strong answer contains</h5>' + esc(q.a) + '</div>' : '') +
+      '<button class="reveal" data-q="' + i + '">' + (open ? "Hide" : "Reveal checklist") + '</button>' +
+    '</div>';
+  }).join("");
+  g.querySelectorAll(".reveal").forEach(b => {
+    b.addEventListener("click", () => {
+      const k = "q" + b.dataset.q;
+      if(state.flipped[k]) delete state.flipped[k]; else state.flipped[k] = true;
+      persist(); renderAssess();
+    });
+  });
+}
+
+function renderGlossary(){
+  el("gl").innerHTML = GLOSSARY.map(g =>
+    '<div class="gt"><dt>' + esc(g.t) + '</dt><dd>' + esc(g.d) + '</dd></div>').join("");
+}
+
+function renderAll(){
+  renderProgress();
+  renderRail();
+  if(view === "course") renderModule();
+  if(view === "assess") renderAssess();
+}
+
+/* ============================ VIEWS ============================ */
+document.querySelectorAll('nav.tabs button').forEach(b => {
+  b.addEventListener("click", () => {
+    view = b.dataset.view;
+    document.querySelectorAll('nav.tabs button').forEach(x => x.setAttribute("aria-selected", x === b ? "true" : "false"));
+    ["course","timeline","assess","glossary"].forEach(v => {
+      el("view-" + v).classList.toggle("hidden", v !== view);
+    });
+    if(view === "course") renderModule();
+    if(view === "assess") renderAssess();
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+});
+
+el("resetBtn").addEventListener("click", () => {
+  state = {read:{}, flipped:{}, ts:0};
+  persist(); renderAll();
+});
+
+/* ============================ BOOT ============================ */
+const local = loadLocal();
+if(local){ state.read = local.read || {}; state.flipped = local.flipped || {}; state.ts = local.ts || 0; }
+renderTimeline();
+renderGlossary();
+renderAll();
+initStore();
+</script>
+</body>
+</html>
