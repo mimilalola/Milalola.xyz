@@ -1,31 +1,328 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Milalola</title>
+
+  <style>
+
+    body {
+      margin: 32px;
+      font-family: Georgia, "Times New Roman", serif;
+      color: #111;
+      background: #fff;
+    }
+
+    h1 {
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      margin-top: 0;
+      margin-bottom: 30px;
+    }
+
+    /* MAIN DASHBOARD */
+
+    .dashboard {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 80px;
+    }
+
+    /* LEFT SIDE */
+
+    .brainbank {
+      flex: 1;
+    }
+
+    .brainbank ul {
+      line-height: 1.6;
+    }
+
+    .brainbank a {
+      color: #111;
+    }
+
+    /* RIGHT SIDE */
+
+    .widgets {
+      width: 500px;
+      margin-right: 40px;
+    }
+
+    /* ROTHKO */
+
+    .rothko {
+      width: 500px;
+      height: 500px;
+      border: none;
+      display: block;
+    }
+
+    /* POMODORO */
+
+    .pomodoro {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .pomodoro-label {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .timer {
+      font-size: 42px;
+      font-weight: normal;
+      margin: 8px 0 14px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-controls button,
+    .timer-modes button {
+      background: none;
+      border: none;
+      font-family: inherit;
+      color: #111;
+      cursor: pointer;
+    }
+
+    .timer-controls button {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin: 0 8px;
+      padding: 5px;
+    }
+
+    .timer-modes {
+      margin-top: 12px;
+    }
+
+    .timer-modes button {
+      font-size: 11px;
+      margin: 0 6px;
+      opacity: 0.45;
+    }
+
+    .timer-modes button.active {
+      opacity: 1;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* SMALL SCREENS */
+
+    @media (max-width: 850px) {
+
+      .dashboard {
+        display: block;
+      }
+
+      .widgets {
+        width: 100%;
+        margin-top: 40px;
+        margin-right: 0;
+      }
+
+      .rothko {
+        width: 100%;
+        max-width: 500px;
+      }
+
+      .pomodoro {
+        max-width: 500px;
+      }
+
+    }
+
+  </style>
 </head>
+
 
 <body>
 
   <h1>Milalola</h1>
-  <p>Brainbank</p>
+  <p class="subtitle">Brainbank</p>
 
-  <ul>
-    <li><a href="./Tools/TaskMatrix/">Task Tracker</a></li>
-    <li><a href="./Tools/Tech Buildout/">Tech Buildout</a></li>
-    <li><a href="./Tools/QuickCheck/">Quick Check</a></li>
-    <li><a href="./Tools/CommentsConsole/">Comments Console</a></li>
-    <li><a href="./Tools/Pontes Appia/">Pontes Appia</a></li>
-    <li><a href="./Tools/Folder/">Test Knowledge Bank</a></li>
-  </ul>
 
-  <iframe
-    src="https://rothko.joonas.wtf/"
-    title="Current Rothko"
-    width="500"
-    height="500"
-    style="border: none;">
-  </iframe>
+  <div class="dashboard">
+
+    <!-- BRAINBANK -->
+
+    <div class="brainbank">
+
+      <ul>
+        <li><a href="./Tools/TaskMatrix/">Task Tracker</a></li>
+        <li><a href="./Tools/Tech Buildout/">Tech Buildout</a></li>
+        <li><a href="./Tools/QuickCheck/">Quick Check</a></li>
+        <li><a href="./Tools/CommentsConsole/">Comments Console</a></li>
+        <li><a href="./Tools/Pontes Appia/">Pontes Appia</a></li>
+        <li><a href="./Tools/Folder/">Test Knowledge Bank</a></li>
+      </ul>
+
+    </div>
+
+
+    <!-- RIGHT-HAND DASHBOARD -->
+
+    <div class="widgets">
+
+      <!-- ROTHKO -->
+
+      <iframe
+        class="rothko"
+        src="https://rothko.joonas.wtf/"
+        title="Current Rothko">
+      </iframe>
+
+
+      <!-- MILALOLA POMODORO -->
+
+      <div class="pomodoro">
+
+        <div class="pomodoro-label">Focus</div>
+
+        <div class="timer" id="timer">
+          25:00
+        </div>
+
+        <div class="timer-controls">
+          <button id="startPause" onclick="toggleTimer()">Start</button>
+          <button onclick="resetTimer()">Reset</button>
+        </div>
+
+        <div class="timer-modes">
+          <button
+            id="focusMode"
+            class="active"
+            onclick="setMode(25, 'Focus', this)">
+            focus
+          </button>
+
+          <span>·</span>
+
+          <button
+            onclick="setMode(5, 'Short Break', this)">
+            short
+          </button>
+
+          <span>·</span>
+
+          <button
+            onclick="setMode(15, 'Long Break', this)">
+            long
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    let totalSeconds = 25 * 60;
+    let selectedMinutes = 25;
+    let timerInterval = null;
+    let running = false;
+
+    function updateDisplay() {
+
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+
+      document.getElementById("timer").textContent =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0");
+    }
+
+
+    function toggleTimer() {
+
+      if (running) {
+
+        clearInterval(timerInterval);
+        running = false;
+
+        document.getElementById("startPause").textContent = "Start";
+
+      } else {
+
+        running = true;
+
+        document.getElementById("startPause").textContent = "Pause";
+
+        timerInterval = setInterval(function () {
+
+          if (totalSeconds > 0) {
+
+            totalSeconds--;
+            updateDisplay();
+
+          } else {
+
+            clearInterval(timerInterval);
+            running = false;
+
+            document.getElementById("startPause").textContent = "Start";
+
+          }
+
+        }, 1000);
+
+      }
+
+    }
+
+
+    function resetTimer() {
+
+      clearInterval(timerInterval);
+
+      running = false;
+      totalSeconds = selectedMinutes * 60;
+
+      document.getElementById("startPause").textContent = "Start";
+
+      updateDisplay();
+    }
+
+
+    function setMode(minutes, label, button) {
+
+      clearInterval(timerInterval);
+
+      running = false;
+      selectedMinutes = minutes;
+      totalSeconds = minutes * 60;
+
+      document.getElementById("startPause").textContent = "Start";
+
+      document.querySelector(".pomodoro-label").textContent = label;
+
+      document
+        .querySelectorAll(".timer-modes button")
+        .forEach(function (modeButton) {
+          modeButton.classList.remove("active");
+        });
+
+      button.classList.add("active");
+
+      updateDisplay();
+    }
+
+  </script>
 
 </body>
 
