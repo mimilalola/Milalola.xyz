@@ -1,329 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Milalola</title>
-
   <style>
-
-    body {
-      margin: 32px;
-      font-family: Georgia, "Times New Roman", serif;
-      color: #111;
-      background: #fff;
-    }
-
-    h1 {
-      margin-bottom: 4px;
-    }
-
-    .subtitle {
-      margin-top: 0;
-      margin-bottom: 30px;
-    }
-
-    /* MAIN DASHBOARD */
-
-    .dashboard {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 80px;
-    }
-
-    /* LEFT SIDE */
-
-    .brainbank {
-      flex: 1;
-    }
-
-    .brainbank ul {
-      line-height: 1.6;
-    }
-
-    .brainbank a {
-      color: #111;
-    }
-
-    /* RIGHT SIDE */
-
-    .widgets {
-      width: 500px;
-      margin-right: 40px;
-    }
-
-    /* ROTHKO */
-
-    .rothko {
-      width: 500px;
-      height: 500px;
-      border: none;
-      display: block;
-    }
-
-    /* POMODORO */
-
-    .pomodoro {
-      text-align: center;
-      margin-top: 30px;
-    }
-
-    .pomodoro-label {
-      font-size: 11px;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .timer {
-      font-size: 42px;
-      font-weight: normal;
-      margin: 8px 0 14px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .timer-controls button,
-    .timer-modes button {
-      background: none;
-      border: none;
-      font-family: inherit;
-      color: #111;
-      cursor: pointer;
-    }
-
-    .timer-controls button {
-      font-size: 11px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin: 0 8px;
-      padding: 5px;
-    }
-
-    .timer-modes {
-      margin-top: 12px;
-    }
-
-    .timer-modes button {
-      font-size: 11px;
-      margin: 0 6px;
-      opacity: 0.45;
-    }
-
-    .timer-modes button.active {
-      opacity: 1;
-      text-decoration: underline;
-      text-underline-offset: 3px;
-    }
-
-    /* SMALL SCREENS */
-
-    @media (max-width: 850px) {
-
-      .dashboard {
-        display: block;
-      }
-
-      .widgets {
-        width: 100%;
-        margin-top: 40px;
-        margin-right: 0;
-      }
-
-      .rothko {
-        width: 100%;
-        max-width: 500px;
-      }
-
-      .pomodoro {
-        max-width: 500px;
-      }
-
-    }
-
+    body { margin:32px; min-height:100vh; font-family:Georgia,"Times New Roman",serif; color:#111; background:#fff; transition:background-color 1.1s ease,color 1.1s ease; }
+    body.night-mode { background-color:#101c32; color:#f3e9d8; }
+    body.night-mode::before { content:""; position:fixed; inset:0; pointer-events:none; z-index:0; background:radial-gradient(ellipse 560px 470px at calc(100% - 68px) 72px,rgba(239,177,85,.32),rgba(211,136,56,.10) 45%,transparent 100%); }
+    body > * { position:relative; z-index:1; }
+    body.night-mode .brainbank a { color:#e9d3ac; }
+    body.night-mode .timer-controls button,body.night-mode .timer-modes button { color:#f3e9d8; }
+    h1 { margin-bottom:4px; }
+    .subtitle { margin-top:0; margin-bottom:30px; }
+    .dashboard { display:flex; justify-content:space-between; align-items:flex-start; gap:80px; }
+    .brainbank { flex:1; min-width:0; }
+    .brainbank ul { line-height:1.6; }
+    .brainbank a { color:#111; }
+    .widgets { width:500px; max-width:100%; margin-right:40px; }
+    .rothko { width:100%; height:500px; border:0; display:block; }
+    .pomodoro { display:flex; justify-content:center; align-items:center; gap:24px; margin:30px auto 0; }
+    .timer-panel { text-align:center; min-width:200px; }
+    .pomodoro-label { font-size:11px; letter-spacing:4px; text-transform:uppercase; margin-bottom:10px; }
+    .timer { font-size:42px; font-weight:normal; margin:8px 0 14px; font-variant-numeric:tabular-nums; }
+    .timer-controls button,.timer-modes button { background:none; border:0; font-family:inherit; color:#111; cursor:pointer; }
+    .timer-controls button { font-size:11px; letter-spacing:2px; text-transform:uppercase; margin:0 8px; padding:5px; }
+    .timer-modes { margin-top:12px; }
+    .timer-modes button { font-size:11px; margin:0 6px; opacity:.45; }
+    .timer-modes button.active { opacity:1; text-decoration:underline; text-underline-offset:3px; }
+    .bulb { position:fixed; top:16px; right:26px; width:85px; height:115px; z-index:10; overflow:visible; }
+    .bulb-halo { fill:#efb55b; opacity:0; filter:blur(9px); transition:opacity .6s ease; }
+    .bulb-glass { fill:none; stroke:#777; stroke-width:1.5; transition:stroke .6s ease; }
+    .bulb-support,.bulb-base { fill:none; stroke:#777; stroke-width:1.5; }
+    .filament { fill:none; stroke:#777; stroke-width:1.8; stroke-linecap:round; transition:stroke .6s ease,filter .6s ease; }
+    .bulb.on .bulb-halo { opacity:.75; filter:blur(15px); }
+    .bulb.on .bulb-glass { stroke:#edc38b; }
+    .bulb.on .filament { stroke:#ffd078; filter:drop-shadow(0 0 7px #f5ac42); }
+    .bulb.finished .bulb-halo { opacity:.6; animation:pulse 1.4s ease-in-out 3; }
+    .bulb.finished .filament { stroke:#f2a536; }
+    @keyframes pulse { 0%,100% {opacity:.15} 50% {opacity:.8} }
+    @media (prefers-reduced-motion:reduce) { .bulb.finished .bulb-halo {animation:none} body {transition:none} }
+    @media (max-width:850px) { .dashboard {display:block} .widgets {margin:40px 0 0; width:100%} .rothko {height: min(500px, 95vw)} }
+    @media (max-width:380px) { body {margin:20px} .pomodoro {gap:8px} .timer-panel {min-width:0} .bulb {width:54px;right:10px;top:10px} }
   </style>
 </head>
-
-
 <body>
-
   <h1>Milalola</h1>
   <p class="subtitle">Brainbank</p>
-
-
   <div class="dashboard">
-
-    <!-- BRAINBANK -->
-
     <div class="brainbank">
-
       <ul>
         <li><a href="./Tools/TaskMatrix/">Task Tracker</a></li>
         <li><a href="./Tools/Tech Buildout/">Tech Buildout</a></li>
-        <li><a href="./Tools/QuickCheck/">Quick Check</a></li>
         <li><a href="./Tools/CommentsConsole/">Comments Console</a></li>
         <li><a href="./Tools/Pontes Appia/">Pontes Appia</a></li>
-        <li><a href="./Tools/Folder/">Test Knowledge Bank</a></li>
       </ul>
-
     </div>
-
-
-    <!-- RIGHT-HAND DASHBOARD -->
-
     <div class="widgets">
-
-      <!-- ROTHKO -->
-
-      <iframe
-        class="rothko"
-        src="https://rothko.joonas.wtf/"
-        title="Current Rothko">
-      </iframe>
-
-
-      <!-- MILALOLA POMODORO -->
-
+      <iframe class="rothko" src="https://rothko.joonas.wtf/" title="Current Rothko"></iframe>
       <div class="pomodoro">
-
-        <div class="pomodoro-label">Focus</div>
-
-        <div class="timer" id="timer">
-          25:00
+        <div class="timer-panel">
+          <div class="pomodoro-label" id="modeLabel">Focus</div>
+          <div class="timer" id="timer" role="timer">25:00</div>
+          <div class="timer-controls">
+            <button id="startPause" type="button">Start</button>
+            <button id="reset" type="button">Reset</button>
+          </div>
+          <div class="timer-modes">
+            <button class="active" data-minutes="25" data-label="Focus" type="button">focus</button>
+            <span>·</span>
+            <button data-minutes="5" data-label="Short Break" type="button">short</button>
+            <span>·</span>
+            <button data-minutes="15" data-label="Long Break" type="button">long</button>
+          </div>
         </div>
-
-        <div class="timer-controls">
-          <button id="startPause" onclick="toggleTimer()">Start</button>
-          <button onclick="resetTimer()">Reset</button>
-        </div>
-
-        <div class="timer-modes">
-          <button
-            id="focusMode"
-            class="active"
-            onclick="setMode(25, 'Focus', this)">
-            focus
-          </button>
-
-          <span>·</span>
-
-          <button
-            onclick="setMode(5, 'Short Break', this)">
-            short
-          </button>
-
-          <span>·</span>
-
-          <button
-            onclick="setMode(15, 'Long Break', this)">
-            long
-          </button>
-        </div>
-
+        <!-- Vintage curly tungsten filament -->
+        <svg class="bulb" id="focusBulb" viewBox="0 0 100 135" role="img" aria-label="Focus light off">
+          <ellipse class="bulb-halo" cx="50" cy="54" rx="43" ry="48"/>
+          <path class="bulb-glass" d="M50 7 C29 7 17 23 17 45 C17 65 28 75 35 91 L65 91 C72 75 83 65 83 45 C83 23 71 7 50 7Z"/>
+          <path class="bulb-support" d="M39 91 V49 M61 91 V49"/>
+          <path class="filament" d="M39 49 C39 35 43 35 43 49 S47 63 47 49 S51 35 51 49 S55 63 55 49 S59 35 59 49 S61 63 61 49"/>
+          <path class="bulb-base" d="M35 96 H65 M37 102 H63 M39 108 H61 M41 114 H59 M44 120 Q50 125 56 120"/>
+        </svg>
       </div>
-
     </div>
-
   </div>
-
-
   <script>
+    let selectedMinutes=25;
+    let remainingMs=selectedMinutes*60000;
+    let endTime=null;
+    let timerInterval=null;
+    let running=false;
+    let audioContext=null;
+    const bulb=document.getElementById('focusBulb');
+    const startButton=document.getElementById('startPause');
+    const timerDisplay=document.getElementById('timer');
 
-    let totalSeconds = 25 * 60;
-    let selectedMinutes = 25;
-    let timerInterval = null;
-    let running = false;
-
+    function prepareAudio() {
+      try {
+        const AC=window.AudioContext||window.webkitAudioContext;
+        if(!AC) return;
+        if(!audioContext) audioContext=new AC();
+        if(audioContext.state==='suspended') audioContext.resume().catch(()=>{});
+      } catch(e) { console.log('Sound unavailable',e); }
+    }
+    function playDing() {
+      if(!audioContext||audioContext.state!=='running') return;
+      const now=audioContext.currentTime;
+      [660,880].forEach((frequency,i)=>{
+        const osc=audioContext.createOscillator();
+        const gain=audioContext.createGain();
+        const start=now+i*.25;
+        osc.type='sine'; osc.frequency.value=frequency;
+        gain.gain.setValueAtTime(.0001,start);
+        gain.gain.exponentialRampToValueAtTime(.12,start+.025);
+        gain.gain.exponentialRampToValueAtTime(.0001,start+.65);
+        osc.connect(gain); gain.connect(audioContext.destination);
+        osc.start(start); osc.stop(start+.7);
+      });
+    }
     function updateDisplay() {
-
-      const minutes = Math.floor(totalSeconds / 60);
-      const seconds = totalSeconds % 60;
-
-      document.getElementById("timer").textContent =
-        String(minutes).padStart(2, "0") +
-        ":" +
-        String(seconds).padStart(2, "0");
+      const seconds=Math.ceil(remainingMs/1000);
+      timerDisplay.textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
     }
-
-
-    function toggleTimer() {
-
-      if (running) {
-
-        clearInterval(timerInterval);
-        running = false;
-
-        document.getElementById("startPause").textContent = "Start";
-
-      } else {
-
-        running = true;
-
-        document.getElementById("startPause").textContent = "Pause";
-
-        timerInterval = setInterval(function () {
-
-          if (totalSeconds > 0) {
-
-            totalSeconds--;
-            updateDisplay();
-
-          } else {
-
-            clearInterval(timerInterval);
-            running = false;
-
-            document.getElementById("startPause").textContent = "Start";
-
-          }
-
-        }, 1000);
-
+    function setBulb(state) {
+      bulb.classList.remove('on','finished');
+      if(state) bulb.classList.add(state);
+      document.body.classList.toggle('night-mode',state==='on');
+      bulb.setAttribute('aria-label',state==='on'?'Focus light on':state==='finished'?'Session complete':'Focus light off');
+    }
+    function stopClock() {
+      clearInterval(timerInterval); timerInterval=null;
+      running=false; endTime=null; startButton.textContent='Start';
+    }
+    function tick() {
+      if(!running) return;
+      remainingMs=Math.max(0,endTime-Date.now());
+      updateDisplay();
+      if(remainingMs===0) {
+        stopClock(); setBulb('finished'); playDing();
+        document.title='Session complete · Milalola';
       }
-
     }
-
-
+    function toggleTimer() {
+      if(running) {
+        tick(); if(!running) return;
+        stopClock(); setBulb(null); document.title='Milalola';
+      } else {
+        prepareAudio();
+        if(remainingMs<=0) remainingMs=selectedMinutes*60000;
+        endTime=Date.now()+remainingMs;
+        running=true; startButton.textContent='Pause';
+        setBulb('on'); document.title='Focus · Milalola';
+        timerInterval=setInterval(tick,250); tick();
+      }
+    }
     function resetTimer() {
-
-      clearInterval(timerInterval);
-
-      running = false;
-      totalSeconds = selectedMinutes * 60;
-
-      document.getElementById("startPause").textContent = "Start";
-
-      updateDisplay();
+      stopClock(); remainingMs=selectedMinutes*60000;
+      updateDisplay(); setBulb(null); document.title='Milalola';
     }
-
-
-    function setMode(minutes, label, button) {
-
-      clearInterval(timerInterval);
-
-      running = false;
-      selectedMinutes = minutes;
-      totalSeconds = minutes * 60;
-
-      document.getElementById("startPause").textContent = "Start";
-
-      document.querySelector(".pomodoro-label").textContent = label;
-
-      document
-        .querySelectorAll(".timer-modes button")
-        .forEach(function (modeButton) {
-          modeButton.classList.remove("active");
-        });
-
-      button.classList.add("active");
-
-      updateDisplay();
+    function setMode(minutes,label,button) {
+      stopClock(); selectedMinutes=minutes; remainingMs=minutes*60000;
+      document.getElementById('modeLabel').textContent=label;
+      document.querySelectorAll('.timer-modes button').forEach(b=>b.classList.remove('active'));
+      button.classList.add('active'); updateDisplay(); setBulb(null);
+      document.title='Milalola';
     }
-
+    startButton.addEventListener('click',toggleTimer);
+    document.getElementById('reset').addEventListener('click',resetTimer);
+    document.querySelectorAll('.timer-modes button').forEach(button=>{
+      button.addEventListener('click',()=>setMode(Number(button.dataset.minutes),button.dataset.label,button));
+    });
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden&&running) tick();});
+    updateDisplay();
   </script>
-
 </body>
-
 </html>
