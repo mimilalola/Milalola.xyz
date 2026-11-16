@@ -270,9 +270,22 @@
       font-size: 14px;
       color: #1C2B3A;
       font-weight: 500;
+      min-width: 0;
     }
     .task-title-cell.empty { color: #B0BAC0; font-weight: 400; }
-    .task-title-cell.done-title { color: #7A8C96; text-decoration: line-through; }
+    .task-title-cell.done-title .task-title-text { color: #7A8C96; text-decoration: line-through; }
+    .task-matter-line {
+      display: block;
+      font-size: 11px;
+      color: #3D5A73;
+      font-weight: 500;
+      margin-top: 2px;
+      text-decoration: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .task-matter-line.missing { color: #C08050; font-style: italic; font-weight: 400; }
     .completed-at {
       font-size: 10px;
       margin-left: 8px;
@@ -348,6 +361,15 @@
       font-family: inherit;
     }
     .field-input:focus { border-color: #3D5A73; }
+    .field-input.matter-warn { border-color: #E0B48A; }
+    .matter-hint {
+      font-size: 10px;
+      margin-top: 5px;
+      letter-spacing: 0.3px;
+      color: #7A8C96;
+    }
+    .matter-hint.ok { color: #2E7D52; font-weight: 600; }
+    .matter-hint.warn { color: #C08050; }
 
     .hour-btns { display: flex; gap: 6px; flex-wrap: wrap; }
     .hour-btn {
@@ -466,7 +488,7 @@
       border-color: #2E7D52;
       color: #fff;
     }
-    .matrix-task-body { flex: 1; }
+    .matrix-task-body { flex: 1; min-width: 0; }
     .matrix-task-top {
       display: flex;
       justify-content: space-between;
@@ -481,6 +503,12 @@
     .matrix-task-title.done-title {
       color: #7A8C96;
       text-decoration: line-through;
+    }
+    .matrix-task-matter {
+      font-size: 11px;
+      color: #3D5A73;
+      margin-top: 2px;
+      font-weight: 500;
     }
     .matrix-task-hrs {
       font-size: 11px;
@@ -680,6 +708,11 @@
       font-weight: 500;
       color: #1C2B3A;
     }
+    .modal-task-matter {
+      font-size: 11px;
+      color: #3D5A73;
+      margin-top: 1px;
+    }
     .modal-task-meta {
       display: flex;
       gap: 8px;
@@ -786,6 +819,7 @@
   <div id="view-input">
     <div class="section-eyebrow" style="margin-bottom:16px">DEFINE YOUR 10 TASKS</div>
     <div id="task-list"></div>
+    <datalist id="matter-options"></datalist>
   </div>
 
   <!-- Matrix View -->
@@ -843,9 +877,13 @@ const HOUR_OPTIONS = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4];
 const MAX_HOURS = 9;
 const TASK_TYPES = ['Drafting', 'Research', 'Decision', 'Follow-up', 'Meeting', 'Review', 'Admin'];
 
+// Firm matter convention: [Client] – [Project] – [Specific subject]
+const MATTER_SEP = ' – ';            // space, en dash, space
+const MATTER_PLACEHOLDER = 'Client – Project – Specific subject';
+
 // ── State ──────────────────────────────────────────────────────────────────
 function emptyTask(id) {
-  return { id, title: '', hours: 1, type: '', quadrant: '', notes: '', done: false, completedAt: null };
+  return { id, matter: '', title: '', hours: 1, type: '', quadrant: '', notes: '', done: false, completedAt: null };
 }
 let tasks = Array.from({ length: 10 }, (_, i) => emptyTask(i + 1));
 let activeTaskId = null;
@@ -870,6 +908,56 @@ function completedTasks() { return assignedTasks().filter(t => t.done); }
 function incompleteTasks(){ return assignedTasks().filter(t => !t.done); }
 function quadrantTasks(qid) { return tasks.filter(t => t.quadrant === qid && t.title.trim()); }
 
+// ── Matter helpers ─────────────────────────────────────────────────────────
+// Normalise separators so "Acme - Fund II -  KYC" becomes "Acme – Fund II – KYC".
+// Any hyphen / en dash / em dash / pipe surrounded by spaces counts as a separator.
+function normalizeMatter(str) {
+  return String(str || '')
+    .replace(/\s+[-–—|]\s+/g, MATTER_SEP)
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+function matterParts(str) {
+  return normalizeMatter(str).split(MATTER_SEP).map(s => s.trim());
+}
+function isValidMatter(str) {
+  const p = matterParts(str);
+  return p.length >= 3 && p.every(s => s.length > 0);
+}
+function matterHint(str) {
+  if (!str.trim()) return { cls: '', text: 'Format: ' + MATTER_PLACEHOLDER };
+  if (isValidMatter(str)) return { cls: 'ok', text: '✓ Matches firm convention' };
+  const n = matterParts(str).filter(Boolean).length;
+  const missing = ['Client', 'Project', 'Specific subject'].slice(n).join(', ');
+  return { cls: 'warn', text: `Incomplete — add ${missing || 'all three parts'} (separate with " – ")` };
+}
+
+// Library of matters used before, so the same string is reused verbatim day to day
+const MATTERS_KEY = 'elr_priority_matrix_matters_v1';
+let knownMatters = [];
+function loadMatters() {
+  try {
+    const raw = localStorage.getItem(MATTERS_KEY);
+    knownMatters = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(knownMatters)) knownMatters = [];
+  } catch(e) { knownMatters = []; }
+}
+function rememberMatter(m) {
+  m = normalizeMatter(m);
+  if (!isValidMatter(m)) return;
+  knownMatters = [m, ...knownMatters.filter(x => x !== m)].slice(0, 200);
+  try { localStorage.setItem(MATTERS_KEY, JSON.stringify(knownMatters)); } catch(e) {}
+  renderMatterOptions();
+}
+function renderMatterOptions() {
+  const all = [...new Set([
+    ...tasks.map(t => normalizeMatter(t.matter)).filter(isValidMatter),
+    ...knownMatters
+  ])];
+  document.getElementById('matter-options').innerHTML =
+    all.map(m => `<option value="${esc(m)}"></option>`).join('');
+}
+
 // ── Persistence ────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'elr_priority_matrix_v1';
 
@@ -892,7 +980,7 @@ function loadState() {
     if (!raw) return false;
     const payload = JSON.parse(raw);
     if (!payload.tasks || !Array.isArray(payload.tasks)) return false;
-    // Merge saved tasks over empty shells to ensure all fields exist
+    // Merge saved tasks over empty shells to ensure all fields exist (older saves have no matter)
     tasks = Array.from({ length: 10 }, (_, i) => {
       const saved = payload.tasks[i];
       return saved ? { ...emptyTask(i + 1), ...saved, id: i + 1 } : emptyTask(i + 1);
@@ -951,9 +1039,24 @@ function renderFooterDate() {
 
 // ── Render: Input View ─────────────────────────────────────────────────────
 function renderInputView() {
+  renderMatterOptions();
   const list = document.getElementById('task-list');
   list.innerHTML = tasks.map(t => renderTaskRow(t)).join('');
   attachTaskRowEvents();
+}
+
+function titleCellClass(t) {
+  return t.done ? 'task-title-cell done-title' : (t.title ? 'task-title-cell' : 'task-title-cell empty');
+}
+function titleCellHTML(t) {
+  const completedAt = (t.done && t.completedAt) ? `<span class="completed-at">✓ ${esc(t.completedAt)}</span>` : '';
+  let matterLine = '';
+  if (t.matter.trim()) {
+    matterLine = `<span class="task-matter-line">${esc(t.matter)}</span>`;
+  } else if (t.title.trim()) {
+    matterLine = `<span class="task-matter-line missing">No matter set</span>`;
+  }
+  return `<span class="task-title-text">${esc(t.title) || 'Untitled task'}</span>${completedAt}${matterLine}`;
 }
 
 function renderTaskRow(t) {
@@ -962,7 +1065,6 @@ function renderTaskRow(t) {
   const isActive = activeTaskId === t.id;
 
   const cbClass = t.done ? 'task-checkbox checked' : (canComplete ? 'task-checkbox' : 'task-checkbox disabled');
-  const titleClass = t.done ? 'task-title-cell done-title' : (t.title ? 'task-title-cell' : 'task-title-cell empty');
   const rowClass = t.done ? 'task-row done-row' : (isActive ? 'task-row active-row' : 'task-row');
 
   const quadrantBadge = q
@@ -970,7 +1072,6 @@ function renderTaskRow(t) {
     : `<span class="task-quadrant-unset">UNSET</span>`;
 
   const typeBadge = t.type ? `<span class="task-type-badge">${esc(t.type)}</span>` : '';
-  const completedAt = (t.done && t.completedAt) ? `<span class="completed-at">✓ ${esc(t.completedAt)}</span>` : '';
 
   const expand = isActive ? renderTaskExpand(t) : '';
 
@@ -979,7 +1080,7 @@ function renderTaskRow(t) {
       <div class="task-row-summary" data-toggle="${t.id}">
         <span class="task-id">T${String(t.id).padStart(2,'0')}</span>
         <div class="${cbClass}" data-check="${t.id}" title="${canComplete?(t.done?'Mark incomplete':'Mark complete'):'Assign quadrant first'}">✓</div>
-        <div class="${titleClass}">${esc(t.title)||'Untitled task'}${completedAt}</div>
+        <div class="${titleCellClass(t)}">${titleCellHTML(t)}</div>
         ${typeBadge}
         <span class="task-hours-cell">${t.hours}h</span>
         ${quadrantBadge}
@@ -1003,9 +1104,18 @@ function renderTaskExpand(t) {
     `<option value="${tp}" ${t.type===tp?'selected':''}>${tp}</option>`
   ).join('');
 
+  const hint = matterHint(t.matter);
+  const warn = hint.cls === 'warn' ? 'matter-warn' : '';
+
   return `
     <div class="task-expand open">
-      <div class="expand-row-2col">
+      <div style="margin-top:12px">
+        <label class="field-label">Matter</label>
+        <input class="field-input ${warn}" data-matter-input="${t.id}" list="matter-options"
+          value="${esc(t.matter)}" placeholder="${MATTER_PLACEHOLDER}" autocomplete="off" />
+        <div class="matter-hint ${hint.cls}" data-matter-hint="${t.id}">${esc(hint.text)}</div>
+      </div>
+      <div class="expand-row-2col" style="margin-top:0">
         <div>
           <label class="field-label">Task title</label>
           <input class="field-input" data-title-input="${t.id}" value="${esc(t.title)}" placeholder="Describe the task..." />
@@ -1035,6 +1145,14 @@ function renderTaskExpand(t) {
     </div>`;
 }
 
+function updateMatterHint(id, el) {
+  const t = tasks.find(t => t.id === id);
+  const hint = matterHint(t.matter);
+  const hintEl = document.querySelector(`[data-matter-hint="${id}"]`);
+  if (hintEl) { hintEl.className = 'matter-hint ' + hint.cls; hintEl.textContent = hint.text; }
+  if (el) el.classList.toggle('matter-warn', hint.cls === 'warn');
+}
+
 function attachTaskRowEvents() {
   // Toggle expand
   document.querySelectorAll('[data-toggle]').forEach(el => {
@@ -1059,6 +1177,28 @@ function attachTaskRowEvents() {
         : null;
       renderAll();
     });
+  });
+
+  // Matter input
+  document.querySelectorAll('[data-matter-input]').forEach(el => {
+    const id = parseInt(el.dataset.matterInput);
+    el.addEventListener('input', () => {
+      tasks.find(t => t.id === id).matter = el.value;
+      updateMatterHint(id, el);
+      rerenderRowSummary(id);
+      saveState();
+    });
+    // On commit: normalise separators and add to the matter library
+    el.addEventListener('change', () => {
+      const t = tasks.find(t => t.id === id);
+      t.matter = normalizeMatter(el.value);
+      el.value = t.matter;
+      updateMatterHint(id, el);
+      rerenderRowSummary(id);
+      rememberMatter(t.matter);
+      saveState();
+    });
+    el.addEventListener('click', e => e.stopPropagation());
   });
 
   // Title input
@@ -1101,7 +1241,6 @@ function attachTaskRowEvents() {
       const id = parseInt(el.dataset.hourBtn);
       const val = parseFloat(el.dataset.val);
       tasks.find(t => t.id === id).hours = val;
-      // re-render hour buttons only
       const parent = el.closest('.hour-btns');
       parent.querySelectorAll('[data-hour-btn]').forEach(b => {
         b.classList.toggle('selected', parseFloat(b.dataset.val) === val);
@@ -1120,7 +1259,6 @@ function attachTaskRowEvents() {
       const qid = el.dataset.qid;
       const t = tasks.find(t => t.id === id);
       t.quadrant = t.quadrant === qid ? '' : qid;
-      // re-style quad buttons
       const parent = el.closest('.quadrant-btns');
       parent.querySelectorAll('[data-quad-btn]').forEach(b => {
         const q = QUADRANTS.find(q => q.id === b.dataset.qid);
@@ -1144,20 +1282,16 @@ function rerenderRowSummary(id) {
   const row = document.querySelector(`.task-row[data-id="${id}"]`);
   if (!row) return;
 
-  // Update row class
   row.className = t.done ? 'task-row done-row' : (activeTaskId === id ? 'task-row active-row' : 'task-row');
 
   const summary = row.querySelector('.task-row-summary');
   const cbEl = summary.querySelector('[data-check]');
   cbEl.className = t.done ? 'task-checkbox checked' : (canComplete ? 'task-checkbox' : 'task-checkbox disabled');
 
-  const titleEl = summary.querySelector('.task-title-cell, .task-title-cell.empty, .task-title-cell.done-title');
+  const titleEl = summary.querySelector('.task-title-cell');
   if (titleEl) {
-    titleEl.className = t.done ? 'task-title-cell done-title' : (t.title ? 'task-title-cell' : 'task-title-cell empty');
-    titleEl.innerHTML = esc(t.title) || 'Untitled task';
-    if (t.done && t.completedAt) {
-      titleEl.innerHTML += `<span class="completed-at">✓ ${esc(t.completedAt)}</span>`;
-    }
+    titleEl.className = titleCellClass(t);
+    titleEl.innerHTML = titleCellHTML(t);
   }
 
   // type badge
@@ -1201,7 +1335,6 @@ function renderMatrixView() {
     'EXECUTION MATRIX — ' + formatDate(document.getElementById('date-input').value).toUpperCase();
   document.getElementById('completion-pct').textContent = pct + '% complete';
 
-  // Quadrant cards
   const grid = document.getElementById('matrix-grid');
   grid.innerHTML = QUADRANTS.map(q => {
     const qt     = quadrantTasks(q.id);
@@ -1219,6 +1352,7 @@ function renderMatrixView() {
                 <div class="matrix-task-title ${t.done?'done-title':''}">${esc(t.title)}</div>
                 <div class="matrix-task-hrs ${t.done?'done-hrs':''}">${t.hours}h</div>
               </div>
+              ${t.matter.trim() ? `<div class="matrix-task-matter">${esc(t.matter)}</div>` : ''}
               <div class="matrix-task-meta">
                 ${t.type  ? `<span class="meta-type">${esc(t.type)}</span>` : ''}
                 ${t.notes ? `<span class="meta-notes">${esc(t.notes)}</span>` : ''}
@@ -1243,7 +1377,6 @@ function renderMatrixView() {
       </div>`;
   }).join('');
 
-  // Attach matrix checkbox events
   document.querySelectorAll('[data-matrix-check]').forEach(el => {
     el.addEventListener('click', () => {
       const id = parseInt(el.dataset.matrixCheck);
@@ -1262,7 +1395,7 @@ function renderMatrixView() {
   if (unassigned.length > 0) {
     uSec.style.display = 'block';
     document.getElementById('unassigned-list').innerHTML =
-      unassigned.map(t => `<div class="unassigned-item">${esc(t.title)}</div>`).join('');
+      unassigned.map(t => `<div class="unassigned-item">${esc(t.title)}${t.matter.trim() ? ` <span style="color:#B0907A">· ${esc(t.matter)}</span>` : ''}</div>`).join('');
   } else { uSec.style.display = 'none'; }
 
   // Summary footer
@@ -1313,6 +1446,7 @@ function setView(v) {
     b.classList.toggle('active', b.dataset.view === v);
   });
   if (v === 'matrix') renderMatrixView();
+  else renderInputView();
 }
 
 document.querySelectorAll('.view-btn').forEach(btn => {
@@ -1320,6 +1454,7 @@ document.querySelectorAll('.view-btn').forEach(btn => {
 });
 
 // ── Reset ──────────────────────────────────────────────────────────────────
+// Clears today's tasks only; the matter library is kept so matters stay reusable.
 function doReset() {
   tasks = Array.from({ length: 10 }, (_, i) => emptyTask(i + 1));
   activeTaskId = null;
@@ -1368,12 +1503,14 @@ document.getElementById('modal-toggle-all').addEventListener('click', () => {
 });
 
 document.getElementById('modal-confirm').addEventListener('click', () => {
+  // Bank today's matters in the library before the day is cleared
+  tasks.forEach(t => rememberMatter(t.matter));
   const incomplete = incompleteTasks();
   const carried = incomplete.filter(t => modalSelectedIds.has(t.id));
   const newTasks = Array.from({ length: 10 }, (_, i) => {
     if (i < carried.length) {
       const s = carried[i];
-      return { ...emptyTask(i + 1), title: s.title, hours: s.hours, type: s.type, quadrant: s.quadrant, notes: s.notes };
+      return { ...emptyTask(i + 1), matter: s.matter, title: s.title, hours: s.hours, type: s.type, quadrant: s.quadrant, notes: s.notes };
     }
     return emptyTask(i + 1);
   });
@@ -1391,7 +1528,7 @@ function renderModal(incomplete) {
   const incSection = document.getElementById('modal-incomplete-section');
 
   if (hasInc) {
-    desc.innerHTML = `You have <strong>${incomplete.length} incomplete ${incomplete.length===1?'task':'tasks'}</strong>. Select which ones to carry forward into tomorrow — they will be transferred with their details intact, but completion status and timestamps will reset.`;
+    desc.innerHTML = `You have <strong>${incomplete.length} incomplete ${incomplete.length===1?'task':'tasks'}</strong>. Select which ones to carry forward into tomorrow — they will be transferred with their details (including matter) intact, but completion status and timestamps will reset.`;
     incSection.style.display = 'block';
     renderModalTaskList(incomplete);
     updateModalSummary(incomplete);
@@ -1412,6 +1549,7 @@ function renderModalTaskList(incomplete) {
       <div class="modal-cb ${sel?'checked':''}">✓</div>
       <div>
         <div class="modal-task-title">${esc(t.title)}</div>
+        ${t.matter.trim() ? `<div class="modal-task-matter">${esc(t.matter)}</div>` : ''}
         <div class="modal-task-meta">
           ${q ? `<span style="font-size:10px;color:${q.accent};font-weight:700;letter-spacing:0.5px">${q.label}</span>` : ''}
           ${t.type ? `<span style="font-size:10px;color:#7A8C96">${esc(t.type)}</span>` : ''}
@@ -1456,34 +1594,42 @@ function updateModalConfirmBtn(incomplete) {
 
 // ── Export CSV ─────────────────────────────────────────────────────────────
 document.getElementById('export-btn').addEventListener('click', () => {
-  // Collect all saved days from localStorage — current day plus any prior exports
-  // For now we export the current loaded state; extend later for multi-day history
   const dateVal  = document.getElementById('date-input').value;
   const dateLabel = formatDate(dateVal); // e.g. "Monday, 9 June 2026"
 
-  const rows = [['Date', 'Task', 'Hours', 'Completed At']];
-
-  tasks
-    .filter(t => t.title.trim() && t.quadrant)
-    .forEach(t => {
-      rows.push([
-        dateLabel,
-        t.title.trim(),
-        t.hours,
-        t.done && t.completedAt ? t.completedAt : ''
-      ]);
-    });
-
-  if (rows.length === 1) {
+  const exportable = tasks.filter(t => t.title.trim() && t.quadrant);
+  if (exportable.length === 0) {
     alert('No assigned tasks to export.');
     return;
   }
+
+  const noMatter = exportable.filter(t => !isValidMatter(t.matter));
+  if (noMatter.length > 0) {
+    const list = noMatter.map(t => `• T${String(t.id).padStart(2,'0')} ${t.title.trim()}`).join('\n');
+    const go = confirm(
+      `${noMatter.length} task${noMatter.length!==1?'s have':' has'} no matter (or one not in "${MATTER_PLACEHOLDER}" form):\n\n${list}\n\n` +
+      `These rows will need manual matching. Export anyway?`
+    );
+    if (!go) return;
+  }
+
+  const rows = [['Date', 'Matter', 'Task', 'Hours', 'Completed At']];
+  exportable.forEach(t => {
+    rows.push([
+      dateLabel,
+      normalizeMatter(t.matter),
+      t.title.trim(),
+      t.hours,
+      t.done && t.completedAt ? t.completedAt : ''
+    ]);
+  });
 
   const csv = rows.map(r =>
     r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
   ).join('\r\n');
 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  // BOM so Excel reads the en dash in matter names correctly
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
@@ -1493,14 +1639,16 @@ document.getElementById('export-btn').addEventListener('click', () => {
 });
 
 // ── Boot ───────────────────────────────────────────────────────────────────
+loadMatters();
 const restored = loadState();
 if (!restored) {
   document.getElementById('date-input').value = getTodayISO();
 }
-// Sync view buttons to restored currentView
 document.querySelectorAll('.view-btn').forEach(b => {
   b.classList.toggle('active', b.dataset.view === currentView);
 });
+document.getElementById('view-input').classList.toggle('hidden', currentView !== 'input');
+document.getElementById('view-matrix').classList.toggle('hidden', currentView !== 'matrix');
 renderAll(false);
 </script>
 </body>
